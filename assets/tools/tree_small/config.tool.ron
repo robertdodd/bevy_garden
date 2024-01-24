@@ -1,0 +1,9 @@
+(
+    name: "Small Tree",
+    key: "tree_small",
+    tool_type: Object,
+    scaling: Some((
+        min: 0.5,
+        max: 2.0,
+    )),
+)

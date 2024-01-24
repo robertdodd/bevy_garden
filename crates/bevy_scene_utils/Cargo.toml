@@ -1,0 +1,19 @@
+[package]
+name = "bevy_scene_utils"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+# Workspace Crates
+game_state = { path = "../game_state" }
+save = { path = "../save" }
+
+# Bevy crates
+bevy = { workspace = true }
+
+# Non-bevy crates
+serde = { workspace = true }
+ron = "0.8"

@@ -1,0 +1,46 @@
+[package]
+name = "bevy_garden"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+# Workspace crates
+tree = { path = "crates/tree" }
+apple = { path = "crates/apple" }
+bevy_helpers = { path = "crates/bevy_helpers" }
+game_state = { path = "crates/game_state" }
+save = { path = "crates/save" }
+background = { path = "crates/background" }
+editor = { path = "crates/editor" }
+prefab_tool = { path = "crates/prefab_tool" }
+game_effects = { path = "crates/game_effects" }
+flower = { path = "crates/flower" }
+pointer_tool = { path = "crates/pointer_tool" }
+bush = { path = "crates/bush" }
+
+# Bevy crates
+bevy = { workspace = true }
+bevy_asset_loader = { workspace = true }
+bevy_mod_raycast = { workspace = true }
+
+[workspace]
+members = [
+  "crates/*",
+]
+
+# Workspace dependencies (for shared versions among workspace crates)
+[workspace.dependencies]
+bevy = { version = "0.12.1" }
+bevy_asset_loader = { version = "0.19.1" }
+bevy_common_assets = { version = "0.9.0", features = [ "ron", "yaml" ] }
+bevy_mod_raycast = { version = "0.16.0" }
+serde = { version = "1.0", features = ["derive"] }
+ron = "0.8"
+rand = "0.8.5"
+
+# Enable max optimizations for non-workspace dependencies, but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
