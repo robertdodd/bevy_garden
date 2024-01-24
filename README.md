@@ -48,7 +48,12 @@ It's relatively easy to add a new object type. Here's a roughly what to do:
    - Add tool to asset loader in [src/game/tool_loader.rs](src/game/tool_loader.rs).
 3. `cargo run` and it should work!
 
-# License
+## Credits
+
+- [bevy_save](https://github.com/hankjordan/bevy_save) - I copied the idea of the `SaveableRegistry` used in
+  `crates/save` from this project.
+
+## License
 
 All code in this repository is dual-licensed under either:
 
