@@ -50,8 +50,8 @@ It's relatively easy to add a new object type. Here's a roughly what to do:
 
 ## Credits
 
-- [bevy_save](https://github.com/hankjordan/bevy_save) - I copied the idea of the `SaveableRegistry` used in
-  `crates/save` from this project.
+- [bevy_save](https://github.com/hankjordan/bevy_save) - I copied the idea of the `SaveableRegistry` and rollbacks
+  used in `crates/save` from this project.
 
 ## License
 
