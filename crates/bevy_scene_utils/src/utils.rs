@@ -3,35 +3,54 @@ use std::any::TypeId;
 use bevy::{prelude::*, scene::serde::SceneDeserializer};
 
 use game_state::prelude::*;
-use save::prelude::*;
+use save::{commands::utils::get_saveable_scene_filter_from_world, prelude::*};
 use serde::de::DeserializeSeed;
 
-pub fn center_entities_in_scene(scene: &mut Scene) {
+/// Normalizes the axes of a vector, so that each axes has a value of either 1.0 or 0.0.
+fn normalize_axes(mut axes: Vec3) -> Vec3 {
+    axes.x = if axes.x > 0. { 1. } else { 0. };
+    axes.y = if axes.y > 0. { 1. } else { 0. };
+    axes.z = if axes.z > 0. { 1. } else { 0. };
+    axes
+}
+
+/// Utility that centers the position of all entities in a scene
+///
+/// * `scene`: The scene to operate on
+/// * `axes`: The axes along which to center. Vec3::new(1.0, 1.0, 0.0) will only center objects along the X and Y axes.
+///           If any of the axes are greater than 0.0, they will be set to 1.0.
+pub fn center_entities_in_scene(scene: &mut Scene, mut axes: Vec3) {
+    axes = normalize_axes(axes);
+
+    // define a query that only returns the transforms of physics bodies in the scene
     let mut query = scene
         .world
         .query_filtered::<&mut Transform, With<PhysicsBody>>();
 
-    // calculate the average position in the scene world so we can use it to center the entities
-    let center = {
-        let mut center = Vec2::ZERO;
-        let mut translation_count = 0;
-        for transform in query.iter(&scene.world) {
-            center += transform.translation.truncate();
-            translation_count += 1;
-        }
-        center / translation_count as f32
-    };
+    // calculate the center by averaging all positions in the scene world
+    let mut center = Vec3::ZERO;
+    let mut count = 0;
+    for transform in query.iter(&scene.world) {
+        center += transform.translation;
+        count += 1;
+    }
+    // prevent divide-by-zero errors
+    if count > 0 {
+        center /= count as f32;
+    }
+    center *= axes;
 
     // update all transforms in the scene world
     let mut count: u32 = 0;
     for mut transform in query.iter_mut(&mut scene.world) {
-        transform.translation -= center.extend(0.0);
+        transform.translation -= center;
         count += 1;
     }
 
     info!("Centered {count} entities in scene");
 }
 
+/// Utility that adds a component to all entities in a scene
 pub fn add_component_to_all_entities_in_scene<C: Bundle + Clone>(scene: &mut Scene, bundle: C) {
     // let mut query = scene.world.query_filtered::<Entity, Without<C>>();
     // for e in query.iter_mut(&mut scene.world) {
@@ -41,8 +60,8 @@ pub fn add_component_to_all_entities_in_scene<C: Bundle + Clone>(scene: &mut Sce
     }
 }
 
-/// Create a `Scene` from a `DynamicScene`, usually so we can mutate the scene before serializing/applying it to the
-/// world.
+/// Utility that creates a `Scene` from a `DynamicScene`, usually so we can mutate the scene before serializing it or
+/// applying it to the world.
 pub fn dynamic_scene_to_scene(
     dynamic_scene: &DynamicScene,
     type_registry: &AppTypeRegistry,
@@ -54,12 +73,12 @@ pub fn dynamic_scene_to_scene(
     Ok(scene)
 }
 
-/// Create a `DynamicScene` from a `Scene`
+/// Utility that creates a `DynamicScene` from a `Scene`
 pub fn scene_to_dynamic_scene(scene: &Scene) -> DynamicScene {
     DynamicScene::from_scene(scene)
 }
 
-/// get all children belonging to an entity from a world
+/// Utility that gets all children belonging to an entity from a world
 pub fn recursively_get_children_from_world(world: &mut World, entity: Entity) -> Vec<Entity> {
     let mut children_query = (*world).query::<&Children>();
 
@@ -154,18 +173,12 @@ pub fn saveable_scene_from_entity(
     };
     info!("creating scene from {} entities", entities_to_save.len());
 
-    // NOTE: panic if either resource does not exist
-    let type_registry = world.resource::<AppTypeRegistry>();
-    let saveable = world.resource::<SaveableRegistry>();
-
     // define a scene filter which only includes types registered in the `SaveableRegistry`
-    let mut filter = SceneFilter::deny_all();
-    for type_registration in type_registry.read().iter() {
-        if saveable.contains(type_registration.type_info().type_path()) {
-            filter = filter.allow_by_id(type_registration.type_id());
-        }
-    }
+    let mut filter = get_saveable_scene_filter_from_world(world);
 
+    // Optionally include children components, which are not registered as saveable by default, but that we may want
+    // to include when capturing objects.
+    // TODO: Maybe remove this, I can't remember if the issue was fixed. It was only needed when capturing objects.
     if include_children_components {
         filter = filter.allow_by_id(TypeId::of::<Children>());
     }
@@ -234,5 +247,27 @@ mod tests {
             scene.entities.len(),
             "expected `entities` to contain 1 entities"
         );
+    }
+
+    #[test]
+    fn normalize_axes_works() {
+        // Test already normalized values
+        assert_eq!(normalize_axes(Vec3::X), Vec3::X);
+        assert_eq!(normalize_axes(Vec3::Y), Vec3::Y);
+        assert_eq!(normalize_axes(Vec3::Y), Vec3::Y);
+        assert_eq!(normalize_axes(Vec3::ONE), Vec3::ONE);
+        assert_eq!(normalize_axes(Vec3::ZERO), Vec3::ZERO);
+
+        // Test non-normalized small values
+        assert_eq!(normalize_axes(Vec3::splat(0.1)), Vec3::ONE);
+        assert_eq!(normalize_axes(Vec3::new(0.1, 0., 0.)), Vec3::X);
+        assert_eq!(normalize_axes(Vec3::new(0., 0.1, 0.)), Vec3::Y);
+        assert_eq!(normalize_axes(Vec3::new(0., 0., 0.1)), Vec3::Z);
+
+        // Test non-normalized large values
+        assert_eq!(normalize_axes(Vec3::splat(2.)), Vec3::ONE);
+        assert_eq!(normalize_axes(Vec3::new(2., 0., 0.)), Vec3::X);
+        assert_eq!(normalize_axes(Vec3::new(0., 2., 0.)), Vec3::Y);
+        assert_eq!(normalize_axes(Vec3::new(0., 0., 2.)), Vec3::Z);
     }
 }
