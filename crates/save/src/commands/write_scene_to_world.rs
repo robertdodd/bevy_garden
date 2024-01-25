@@ -2,8 +2,6 @@ use bevy::{ecs::system::Command, prelude::*, scene::SceneSpawnError, utils::Hash
 
 use crate::events::SaveResult;
 
-use super::utils::*;
-
 /// Writes a scene to the world without keeping a reference to the scene.
 /// This differs from `SceneSpawner`, which does keep a reference to the scene asset. This command allows us to reload
 /// the asset without the side effects of `SceneSpawner` updating existing entities spawned from that scene.
@@ -56,10 +54,10 @@ impl Command for WriteSceneToWorldCommand {
         // emit the success/fail event
         if let Err(err) = result {
             error!("Error applying WriteSceneToWorldCommand: {err:?}");
-            emit_save_result_event(world, SaveResult::LevelLoad(Err(format!("{err:?}"))));
+            world.send_event(SaveResult::LevelLoad(Err(format!("{err:?}"))));
         } else {
             info!("successfully loaded world");
-            emit_save_result_event(world, SaveResult::LevelLoad(Ok(())));
+            world.send_event(SaveResult::LevelLoad(Ok(())));
         }
     }
 }

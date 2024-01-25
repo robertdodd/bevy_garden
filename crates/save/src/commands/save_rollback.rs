@@ -30,6 +30,6 @@ impl Command for SaveRollbackCommand {
         );
 
         // emit the success result
-        emit_save_result_event(world, SaveResult::RollbackSave(Ok(())));
+        world.send_event(SaveResult::RollbackSave(Ok(())));
     }
 }
