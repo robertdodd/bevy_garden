@@ -53,10 +53,10 @@ pub struct Disabled;
 #[reflect(Component)]
 pub struct Pickable;
 
-/// Marker for entities that cannot be deleted in the editor
+/// Marker for static entities that cannot be deleted or captured to scenes, such as the ground/background.
 #[derive(Component, Clone, Reflect, Default)]
 #[reflect(Component)]
-pub struct NotDeletable;
+pub struct StaticLocked;
 
 /// Marker added to UI nodes that should block the cursor from interacting with the game world underneath.
 ///

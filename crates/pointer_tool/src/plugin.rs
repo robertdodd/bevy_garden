@@ -92,7 +92,7 @@ fn handle_delete_keys(
     mut query: Query<&mut PointerToolSelection, With<PointerTool>>,
     keys: Res<Input<KeyCode>>,
     mut despawn_writer: EventWriter<DespawnEntityAndRelations>,
-    not_deletable_query: Query<(), With<NotDeletable>>,
+    not_deletable_query: Query<(), With<StaticLocked>>,
     mut select_writer: EventWriter<SelectEvent>,
 ) {
     if keys.just_pressed(KeyCode::Delete) {
