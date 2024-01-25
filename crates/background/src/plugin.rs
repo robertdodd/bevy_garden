@@ -41,7 +41,7 @@ fn setup_new_backgrounds(
             GameMarker,
             SpatialBundle::default(),
             AcceptsAttachables,
-            NotDeletable,
+            StaticLocked,
         ));
 
         // Handle disabled marker
