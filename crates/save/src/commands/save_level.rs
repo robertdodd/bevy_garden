@@ -26,7 +26,7 @@ impl Command for SaveLevelCommand {
         // ensure directory exists
         if let Err(err) = ensure_directory_exists_for_filename(&filename) {
             error!(err);
-            emit_save_result_event(world, SaveResult::LevelSave(Err(err)));
+            world.send_event(SaveResult::LevelSave(Err(err)));
             return;
         }
 
@@ -40,7 +40,7 @@ impl Command for SaveLevelCommand {
             .map_err(|err| format!("{err:?}"));
         if let Err(err) = serialized_scene {
             error!("error serializing scene: {err}");
-            emit_save_result_event(world, SaveResult::LevelSave(Err(err)));
+            world.send_event(SaveResult::LevelSave(Err(err)));
             return;
         }
         let serialized_scene = serialized_scene.unwrap();
@@ -58,7 +58,7 @@ impl Command for SaveLevelCommand {
 
         // emit the success event
         // TODO: Can we listen for the `IoTaskPool` result, and include error messages?
-        emit_save_result_event(world, SaveResult::LevelSave(Ok(self.filename)));
+        world.send_event(SaveResult::LevelSave(Ok(self.filename)));
     }
 }
 

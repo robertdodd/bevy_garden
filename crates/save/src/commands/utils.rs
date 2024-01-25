@@ -1,20 +1,17 @@
 use std::{fs::create_dir_all, path::Path};
 
-use bevy::{ecs::system::SystemState, prelude::*};
+use bevy::prelude::*;
 
-use crate::{events::*, registry::SaveableRegistry, rollbacks::Rollbacks, types::*};
+use crate::{registry::SaveableRegistry, rollbacks::Rollbacks, types::*};
 
 use super::WriteSceneToWorldCommand;
 
+// Despawn all entities with `Saveable` or `DespawnOnLoad` components.
 #[allow(clippy::type_complexity)]
 pub(crate) fn despawn_saveable_entities(
     commands: &mut Commands,
     query: &Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
 ) {
-    // Despawn all saveable/despawn-on-load entities
-    // There is a bug in Bevy where despawning sounds does not stop them playing, so we need to stop those sounds
-    // before despawning them. I think we can do them in the same loop, because the despawn command is only applied
-    // at the end of the frame.
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
@@ -53,13 +50,6 @@ pub(crate) fn apply_rollback(
     }
 }
 
-/// Emits a save result event from the world. For use by commands.
-pub(crate) fn emit_save_result_event(world: &mut World, event: SaveResult) {
-    let mut save_events_system_state = SystemState::<ResMut<Events<SaveResult>>>::new(world);
-    let mut save_events = save_events_system_state.get_mut(world);
-    save_events.send(event);
-}
-
 // This function is public so it can be conveniently used by the client.
 /// Creates the full directory path to a filename.
 ///
@@ -82,6 +72,19 @@ pub(crate) fn saveable_scene_from_world(world: &mut World) -> DynamicScene {
     let mut query = world.query_filtered::<Entity, With<Saveable>>();
     let entities: Vec<Entity> = query.iter(world).collect();
 
+    // get a scene filter from the world that only includes types registered in the `SaveableRegistry`
+    let filter = get_saveable_scene_filter_from_world(world);
+
+    // build the scene
+    DynamicSceneBuilder::from_world(world)
+        .with_filter(filter)
+        .extract_entities(entities.into_iter())
+        .remove_empty_entities()
+        .build()
+}
+
+/// Create a `SceneFilter` that only includes components registered in the world's `SaveableRegistry`.
+pub fn get_saveable_scene_filter_from_world(world: &mut World) -> SceneFilter {
     // NOTE: panic if either resource does not exist
     let type_registry = world.resource::<AppTypeRegistry>();
     let saveable = world.resource::<SaveableRegistry>();
@@ -94,10 +97,5 @@ pub(crate) fn saveable_scene_from_world(world: &mut World) -> DynamicScene {
         }
     }
 
-    // build the scene
-    DynamicSceneBuilder::from_world(world)
-        .with_filter(filter)
-        .extract_entities(entities.into_iter())
-        .remove_empty_entities()
-        .build()
+    filter
 }
