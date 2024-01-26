@@ -110,6 +110,7 @@ fn setup_new_bushes(
             GameMarker,
             SpatialBundle::from_transform(*transform),
             ExternalRelations(bush_meshes),
+            PhysicsBody,
         ));
 
         // Handle the disabled marker.
