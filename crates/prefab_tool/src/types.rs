@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::assets::ToolScaling;
+use editor::prelude::{PrefabConfig, ToolScaling};
 
 /// The prefab tool cursor
 #[derive(Component)]
@@ -20,11 +20,7 @@ pub(crate) struct PrefabToolOk;
 
 /// Resource holding the path to the tool definition
 #[derive(Resource)]
-pub(crate) struct PrefabToolPath(pub String);
-
-/// System set for crate cursor systems
-#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
-pub(crate) struct PrefabToolCursorSet;
+pub(crate) struct PrefabToolConfig(pub PrefabConfig);
 
 #[derive(Event)]
 pub(crate) struct PrefabToolResult(pub Result<String, String>);

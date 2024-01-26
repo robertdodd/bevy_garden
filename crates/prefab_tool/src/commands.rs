@@ -43,7 +43,7 @@ impl Command for SpawnPrefabCommand {
                     .world
                     .query_filtered::<&mut Transform, Without<Parent>>();
                 for mut transform in query.iter_mut(&mut scene.world) {
-                    *transform = self.transform;
+                    *transform = self.transform.mul_transform(*transform);
                 }
 
                 // NOTE: if using `rapier` physics, you might want to clear any `Velocity` components in the scene

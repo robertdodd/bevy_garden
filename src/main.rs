@@ -7,6 +7,7 @@ use bevy_mod_raycast::prelude::*;
 use apple::prelude::ApplePlugin;
 use background::prelude::BackgroundPlugin;
 use bush::prelude::BushPlugin;
+use duplicate_tool::prelude::DuplicateToolPlugin;
 use editor::prelude::EditorPlugin;
 use flower::prelude::FlowerPlugin;
 use game::GamePlugin;
@@ -65,6 +66,7 @@ fn main() {
             FlowerPlugin,
             PointerToolPlugin,
             BushPlugin,
+            DuplicateToolPlugin,
         ))
         // first-party plugins for in-game menus (tool panel UI and failed-to-load menu), spawning the game and
         // loading the tool assets.

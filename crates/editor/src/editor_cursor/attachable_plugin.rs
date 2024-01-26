@@ -1,13 +1,16 @@
 use bevy::prelude::*;
 use bevy_mod_raycast::prelude::*;
 
-use editor::prelude::*;
 use game_state::prelude::*;
 
-use crate::types::PrefabToolCursorSet;
+use crate::prelude::pick_entity_from_raycast;
 
-/// Plugin which handles prefab tools defined by `ron` files
-pub struct AttachableCursorPlugin;
+use super::{cursor_not_blocked, EditorCursorSet};
+
+/// Plugin which handles cursors that place attachables.
+///
+/// It is responsible for updating the cursor `Transform` and sending `PlaceAttachableEvent` when the mouse is clicked.
+pub(crate) struct AttachableCursorPlugin;
 
 impl Plugin for AttachableCursorPlugin {
     fn build(&self, app: &mut App) {
@@ -15,9 +18,11 @@ impl Plugin for AttachableCursorPlugin {
             Update,
             (
                 setup_new_cursors.run_if(in_game),
-                (update_cursor_position, handle_mouse_click)
+                (
+                    update_cursor_position.in_set(EditorCursorSet::Transform),
+                    handle_mouse_click.in_set(EditorCursorSet::Click),
+                )
                     .chain()
-                    .in_set(PrefabToolCursorSet)
                     .run_if(cursor_not_blocked),
             ),
         );
@@ -29,7 +34,7 @@ const DEFAULT_PLANE_DISTANCE: f32 = 10.;
 
 /// Cursor that places objects as children on other entities
 #[derive(Component)]
-pub(crate) struct AttachableCursor {
+pub struct AttachableCursor {
     pub distance: f32,
     pub forward: Vec3,
 }
@@ -50,7 +55,7 @@ struct HitData {
 
 /// Event emitted by this plugin when the mouse is clicked on a valid target
 #[derive(Event)]
-pub(crate) struct PlaceAttachableEvent {
+pub struct PlaceAttachableEvent {
     pub tool: Entity,
     pub target: Entity,
     pub transform: Transform,

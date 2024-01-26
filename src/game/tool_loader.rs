@@ -32,20 +32,48 @@ pub(crate) struct PrefabToolAssets {
         ),
         collection(typed)
     )]
-    pub tools: Vec<Handle<PrefabTool>>,
+    pub tools: Vec<Handle<PrefabToolAsset>>,
 }
 
 /// Add prefab tool assets to the tool library
 fn handle_tool_assets(
+    assets: Res<AssetServer>,
     prefab_tools: Res<PrefabToolAssets>,
-    tool_assets: Res<Assets<PrefabTool>>,
+    tool_assets: Res<Assets<PrefabToolAsset>>,
     mut tool_library: ResMut<ToolLibrary>,
 ) {
     for handle in prefab_tools.tools.iter() {
         if let Some(tool_def) = tool_assets.get(handle) {
+            // Define the path to the scene asset
+            let scene_path = handle
+                .path()
+                .unwrap()
+                .path()
+                .parent()
+                .unwrap()
+                .join("prefab.scn.ron");
+
+            // Register the tool in the tool library
             tool_library.register_tool(ToolInfo {
                 key: tool_def.key.clone(),
-                tool: Tool::Prefab(handle.path().unwrap().to_string()),
+                tool: Tool::Prefab(PrefabConfig {
+                    name: tool_def.name.clone(),
+                    scene: assets.load(scene_path),
+                    tool_type: match &tool_def.tool_type {
+                        PrefabToolAssetType::Attachable(config) => {
+                            PrefabToolType::Attachable(PrefabAttachableConfig {
+                                distance: config.distance,
+                                forward: config.forward,
+                            })
+                        }
+                        PrefabToolAssetType::Object => PrefabToolType::Object,
+                    },
+                    initial_scale: tool_def.initial_scale,
+                    scaling: tool_def.scaling.as_ref().map(|scaling| ToolScaling {
+                        min: scaling.min,
+                        max: scaling.max,
+                    }),
+                }),
                 name: tool_def.name.clone(),
             });
         }

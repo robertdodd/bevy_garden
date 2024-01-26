@@ -29,7 +29,7 @@ impl Plugin for PointerToolPlugin {
                     (
                         // Run after `EditorCursorSet` to ensure we have the correct cursor status
                         handle_mouse_click
-                            .after(EditorCursorSet)
+                            .in_set(EditorCursorSet::Click)
                             .run_if(cursor_not_blocked),
                         handle_delete_keys,
                     )

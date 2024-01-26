@@ -1,33 +1,36 @@
 use bevy::prelude::*;
 
-use editor::prelude::*;
 use game_state::prelude::*;
 
-use crate::types::PrefabToolCursorSet;
+use super::{cursor_not_blocked, EditorCursorSet};
 
 /// Plugin which handles cursors that place objects on the ground.
-pub struct ObjectCursorPlugin;
+///
+/// The `Transform` of `ObjectCursor`s is updated each frame, and `PlaceObjectEvent` events are emitted when the mouse
+/// is clicked.
+pub(crate) struct ObjectCursorPlugin;
 
 impl Plugin for ObjectCursorPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<PlaceObjectEvent>().add_systems(
             Update,
-            (update_cursor_position, handle_mouse_click)
-                .chain()
-                .in_set(PrefabToolCursorSet)
+            (
+                update_cursor_position.in_set(EditorCursorSet::Transform),
+                handle_mouse_click.in_set(EditorCursorSet::Click),
+            )
                 .run_if(in_game)
                 .run_if(cursor_not_blocked),
         );
     }
 }
 
-/// A cursor that places objects on the ground
+/// A cursor used for placing objects on the ground
 #[derive(Component)]
-pub(crate) struct ObjectCursor;
+pub struct ObjectCursor;
 
-/// Event emitted by this plugin when the mouse is clicked in a valid position
+/// Event emitted by this plugin when the mouse is clicked
 #[derive(Event)]
-pub(crate) struct PlaceObjectEvent {
+pub struct PlaceObjectEvent {
     pub tool: Entity,
     pub transform: Transform,
 }

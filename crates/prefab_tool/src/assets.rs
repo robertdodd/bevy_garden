@@ -1,45 +1,55 @@
 use bevy::{prelude::*, reflect::TypePath};
 use serde::{Deserialize, Serialize};
 
+/// Configuration controlling the minimum and maximum an object can be scaled when placing.
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ToolScaling {
+pub struct PrefabToolAssetScaling {
+    /// Minimum scale amount
     pub min: f32,
+    /// Maximum scale amount
     pub max: f32,
 }
 
+/// Configuration for attachable tools. Controls how they are oriented when placing.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AttachableConfig {
+pub struct PrefabToolAssetAttachable {
+    /// Offset the object from the surface its placed on, in the direction of the surface normal.
     pub distance: f32,
+    /// The forward direction of the object. Orients the object so this vector faces in the direction of the surface
+    /// normal that its placed on.
     pub forward: Vec3,
 }
 
+/// The type of prefab tool, controlling how it is placed into the world.
 #[derive(Debug, Serialize, Deserialize)]
-pub enum PrefabToolType {
-    Attachable(AttachableConfig),
+pub enum PrefabToolAssetType {
+    Attachable(PrefabToolAssetAttachable),
     Object,
 }
 
 #[derive(Asset, Debug, Serialize, Deserialize, TypePath)]
-pub struct PrefabTool {
-    /// Name of the tool. Should be the "noun" describing the object the tool places.
+pub struct PrefabToolAsset {
+    /// Name of the tool. Should be the object "noun".
     pub name: String,
 
-    /// Unique key to identify the tool.
+    /// Unique key to identify the tool. The ToolLibrary will panic if you atttempt to add duplicate keys.
     pub key: String,
 
-    // How the tool behaves, i.e. whether it is placing an attachable object, or a physics object.
-    pub tool_type: PrefabToolType,
+    /// How the tool behaves, can be either an attachable (anchored to a parent entity), or a physics object, which is
+    /// placed on the ground.
+    pub tool_type: PrefabToolAssetType,
 
     /// Initial scale. Defaults to 1.0.
-    #[serde(default = "PrefabTool::default_scale")]
+    #[serde(default = "PrefabToolAsset::default_initial_scale")]
     pub initial_scale: f32,
 
-    /// Whether the prefab can be scaled before placing
-    pub scaling: Option<ToolScaling>,
+    /// Optional min and max scaling values. A value of `None` will disable scaling.
+    pub scaling: Option<PrefabToolAssetScaling>,
 }
 
-impl PrefabTool {
-    pub fn default_scale() -> f32 {
+impl PrefabToolAsset {
+    /// Default value for the `initial_scale` property
+    pub fn default_initial_scale() -> f32 {
         1.0
     }
 }

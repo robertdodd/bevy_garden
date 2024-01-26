@@ -7,7 +7,7 @@ use editor::prelude::*;
 use game_state::prelude::*;
 use save::prelude::RollbackSaveEvent;
 
-use crate::{assets::*, attachable_cursor::*, commands::*, object_cursor::*, types::*};
+use crate::{assets::*, commands::*, types::*};
 
 /// Plugin which handles prefab tools defined by `ron` files
 pub struct PrefabToolPlugin;
@@ -16,12 +16,7 @@ impl Plugin for PrefabToolPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<PrefabToolResult>()
             .add_state::<PrefabToolState>()
-            .configure_sets(Update, PrefabToolCursorSet.after(EditorCursorSet))
-            .add_plugins((
-                RonAssetPlugin::<PrefabTool>::new(&["tool.ron"]),
-                ObjectCursorPlugin,
-                AttachableCursorPlugin,
-            ))
+            .add_plugins(RonAssetPlugin::<PrefabToolAsset>::new(&["tool.ron"]))
             .add_systems(OnEnter(PrefabToolState::Active), setup_tool)
             .add_systems(OnEnter(PrefabToolState::Reload), on_enter_reload)
             .add_systems(
@@ -37,7 +32,7 @@ impl Plugin for PrefabToolPlugin {
                         handle_place_attachable_events.run_if(on_event::<PlaceAttachableEvent>()),
                         handle_place_object_events.run_if(on_event::<PlaceObjectEvent>()),
                     )
-                        .after(PrefabToolCursorSet),
+                        .after(EditorCursorSet::Click),
                     handle_asset_loading.run_if(in_state(PrefabToolState::Active)),
                     handle_mouse_scroll.run_if(in_game),
                     handle_results.run_if(on_event::<PrefabToolResult>()),
@@ -63,46 +58,28 @@ fn on_enter_reload(mut next_state: ResMut<NextState<PrefabToolState>>) {
     next_state.set(PrefabToolState::Active);
 }
 
-fn setup_tool(
-    mut commands: Commands,
-    assets: Res<AssetServer>,
-    path: Res<PrefabToolPath>,
-    tool_assets: Res<Assets<PrefabTool>>,
-) {
+fn setup_tool(mut commands: Commands, config: Res<PrefabToolConfig>) {
     info!("[{TOOL_NAME}] ==> setup");
-
-    // Read the tool asset
-    let handle = assets.load(path.0.clone());
-    let tool = tool_assets.get(handle.id());
-    if tool.is_none() {
-        panic!("Could not load tool file: {}", path.0);
-    }
-    let tool = tool.unwrap();
-
-    // Load the scene file
-    let asset_path = handle.path().unwrap();
-    let scene_path = asset_path.path().parent().unwrap().join("prefab.scn.ron");
-    let scene_handle = assets.load(scene_path);
 
     // Spawn the tool cursor entity
     let tool_entity = commands
         .spawn((
             GameMarker,
-            Name::new(format!("{TOOL_NAME} - {}", tool.name)),
+            Name::new(format!("{TOOL_NAME} - {}", config.0.name)),
             OnPrefabTool,
             PrefabToolCursor {
-                name: tool.name.clone(),
-                scene_handle: scene_handle.clone(),
-                scaling: tool.scaling.clone(),
+                name: config.0.name.clone(),
+                scene_handle: config.0.scene.clone(),
+                scaling: config.0.scaling.clone(),
             },
             SpatialBundle::from_transform(
-                Transform::IDENTITY.with_scale(Vec3::splat(tool.initial_scale)),
+                Transform::IDENTITY.with_scale(Vec3::splat(config.0.initial_scale)),
             ),
         ))
         .id();
 
     // Add the appropriate cursor component depending on how the tool needs to be placed
-    match tool.tool_type {
+    match config.0.tool_type {
         PrefabToolType::Attachable(ref config) => {
             commands.entity(tool_entity).insert(AttachableCursor {
                 distance: config.distance,
@@ -170,27 +147,52 @@ fn handle_place_object_events(
 #[allow(clippy::type_complexity)]
 fn handle_asset_loading(
     mut commands: Commands,
+    scenes: Res<Assets<DynamicScene>>,
     assets: Res<AssetServer>,
     query: Query<(Entity, &PrefabToolCursor), Without<PrefabToolOk>>,
+    mut pop_tool_writer: EventWriter<PopToolEvent>,
 ) {
     for (entity, prefab_tool) in query.iter() {
-        if assets.get_load_state(prefab_tool.scene_handle.id()) == Some(LoadState::Loaded) {
-            info!("[{TOOL_NAME}] => Scene loaded, spawning as child of tool");
+        // Get the load state of the scene asset
+        // - `Ok(true)` - Success
+        // - `Ok(false)` - Load in progress
+        // - `Err(String)` - Failed to load
+        let loaded = if scenes.contains(prefab_tool.scene_handle.id()) {
+            Ok(true)
+        } else {
+            match assets.get_load_state(prefab_tool.scene_handle.id()) {
+                Some(LoadState::Loaded) => Ok(true),
+                Some(LoadState::Loading) => Ok(false),
+                _ => Err("Scene asset failed to load".to_string()),
+            }
+        };
 
-            // Mark the tool as finished loading
-            commands.entity(entity).insert(PrefabToolOk);
+        // Once the scene asset has loaded then add it to the tool
+        match loaded {
+            Ok(true) => {
+                info!("[{TOOL_NAME}] => Scene loaded, spawning as child of tool");
 
-            // Spawn the scene as a child of the tool, mark it as disabled.
-            // This custom command modifies the scene and then spawns it as a `DynamicSceneBundle`. In a more advanced
-            // editor, you could use this command to extract any information about the scene that the tool should know
-            // about, such as editable components, layer sizes etc.
-            // TODO: Check that the scene contains a single entity first
-            commands.add(ExtractSceneToChildCommand {
-                scene: prefab_tool.scene_handle.clone(),
-                entity,
-                child_bundle: (Name::new("Scene Tool Scene"), OnPrefabTool, GameMarker),
-                scene_bundle: (Disabled, GameMarker, OnPrefabTool),
-            });
+                // Mark the tool as finished loading
+                commands.entity(entity).insert(PrefabToolOk);
+
+                // Spawn the scene as a child of the tool, mark it as disabled.
+                // This custom command modifies the scene and then spawns it as a `DynamicSceneBundle`. In a more
+                // advanced editor, you could use this command to extract any information about the scene that the
+                // tool should know about, such as editable components, layer sizes etc.
+                // TODO: Check that the scene contains a single entity first
+                commands.add(ExtractSceneToChildCommand {
+                    scene: prefab_tool.scene_handle.clone(),
+                    entity,
+                    child_bundle: (Name::new("Scene Tool Scene"), OnPrefabTool, GameMarker),
+                    scene_bundle: (Disabled, GameMarker, OnPrefabTool),
+                });
+            }
+            Ok(false) => (), // Still loading, continue waiting
+            Err(err) => {
+                // There was an error loading the scene asset
+                error!("{err}");
+                pop_tool_writer.send(PopToolEvent);
+            }
         }
     }
 }
@@ -203,9 +205,11 @@ fn handle_tool_change_events(
     state: Res<State<PrefabToolState>>,
 ) {
     for event in events.read() {
-        if let Tool::Prefab(path) = &event.0 {
-            commands.insert_resource(PrefabToolPath(path.clone()));
-            // handle changing to a different prefab while already activated
+        if let Tool::Prefab(config) = &event.0 {
+            commands.insert_resource(PrefabToolConfig(config.clone()));
+            // if the prefab tool is already activated for a different tool, we transition the the "reload" state which
+            // will trigger the tool/scene to reload and reset the cursor.
+            // As far as I know that can't happen in this example, but it's good to handle it in case that changes.
             if *state.get() == PrefabToolState::Active {
                 next_state.set(PrefabToolState::Reload);
             } else {
@@ -234,6 +238,10 @@ fn handle_mouse_scroll(
     }
 }
 
+/// Handles `PrefabToolResult` events, which are emitted by the `` command after attempting to spawn the object into
+/// the world.
+/// When successful, it saves a rollback. If you had "toast" messages in the game, this is where you'd show any error
+/// messages in the game.
 fn handle_results(
     mut events: EventReader<PrefabToolResult>,
     mut rollback_writer: EventWriter<RollbackSaveEvent>,
