@@ -63,6 +63,9 @@ impl Command for SaveLevelCommand {
 }
 
 #[cfg(target_arch = "wasm32")]
+/// An implementation of the save level command for WASM, which does nothing currently because we need file system
+/// access.
+/// TODO: implement this using LocalStorage
 impl Command for SaveLevelCommand {
     fn apply(self, _world: &mut World) {
         info!(
