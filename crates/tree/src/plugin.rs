@@ -45,6 +45,7 @@ fn setup_new_trees(
         cmds.insert((
             Name::new("Tree"),
             GameMarker,
+            PhysicsBody,
             // We don't want to register all components from `SpatialBundle` in save files, so instead we only save
             // the transform and initialize a `SpatialBundle` with that transform each time its loaded.
             SpatialBundle::from_transform(*transform),
