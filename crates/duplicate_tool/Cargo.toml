@@ -1,5 +1,5 @@
 [package]
-name = "prefab_tool"
+name = "duplicate_tool"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,16 +7,13 @@ edition = "2021"
 
 [dependencies]
 
-# Workspace Crates
+# Workspace crates
 game_state = { path = "../game_state" }
-bevy_helpers = { path = "../bevy_helpers" }
-save = { path = "../save" }
-bevy_scene_utils = { path = "../bevy_scene_utils" }
 editor = { path = "../editor" }
+bevy_helpers = { path = "../bevy_helpers" }
+bevy_scene_utils = { path = "../bevy_scene_utils" }
+save = { path = "../save" }
 
-# Bevy Crates
+# Bevy crates
 bevy = { workspace = true }
-bevy_common_assets = { workspace = true }
-
-# Non-bevy crates
-serde = { workspace = true }
+bevy_mod_raycast = { workspace = true }

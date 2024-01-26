@@ -20,11 +20,18 @@ pub struct ToolLibrary {
 impl Default for ToolLibrary {
     fn default() -> Self {
         Self {
-            tools: vec![ToolInfo {
-                key: "pointer".to_string(),
-                name: "Pointer".to_string(),
-                tool: Tool::Pointer,
-            }],
+            tools: vec![
+                ToolInfo {
+                    key: "pointer".to_string(),
+                    name: "Pointer".to_string(),
+                    tool: Tool::Pointer,
+                },
+                ToolInfo {
+                    key: "duplicate".to_string(),
+                    name: "Duplicate".to_string(),
+                    tool: Tool::Duplicate,
+                },
+            ],
         }
     }
 }

@@ -628,6 +628,7 @@ dependencies = [
  "bevy_helpers",
  "bevy_mod_raycast",
  "bush",
+ "duplicate_tool",
  "editor",
  "flower",
  "game_effects",
@@ -1619,6 +1620,19 @@ name = "downcast-rs"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
+name = "duplicate_tool"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_helpers",
+ "bevy_mod_raycast",
+ "bevy_scene_utils",
+ "editor",
+ "game_state",
+ "save",
+]
 
 [[package]]
 name = "editor"
@@ -2860,7 +2874,6 @@ dependencies = [
  "bevy",
  "bevy_common_assets",
  "bevy_helpers",
- "bevy_mod_raycast",
  "bevy_scene_utils",
  "editor",
  "game_state",

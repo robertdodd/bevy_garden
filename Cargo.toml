@@ -20,6 +20,7 @@ game_effects = { path = "crates/game_effects" }
 flower = { path = "crates/flower" }
 pointer_tool = { path = "crates/pointer_tool" }
 bush = { path = "crates/bush" }
+duplicate_tool = { path = "crates/duplicate_tool" }
 
 # Bevy crates
 bevy = { workspace = true }
