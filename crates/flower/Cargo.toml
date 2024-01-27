@@ -6,9 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+# Workspace crates
 game_state = { path = "../game_state" }
 game_effects = { path = "../game_effects" }
 save = { path = "../save" }
 bevy_helpers = { path = "../bevy_helpers" }
 
+# Bevy crates
 bevy = { workspace = true }

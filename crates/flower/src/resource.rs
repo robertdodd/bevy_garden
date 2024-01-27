@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-/// Resource holding the shared meshes and materials used by all flowers
+/// Resource holding the shared meshes and materials used by flowers
 #[derive(Resource)]
 pub(crate) struct FlowerResource {
     pub seed_mesh: Handle<Mesh>,
