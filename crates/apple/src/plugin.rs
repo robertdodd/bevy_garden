@@ -7,7 +7,9 @@ use save::prelude::*;
 
 use crate::{components::*, resource::*};
 
-/// Plugin which handles `Apple` entities
+/// Plugin which adds apples to the game.
+///
+/// Apples are "attachable" objects, meaning they must be children of a `PhysicsBody` object.
 pub struct ApplePlugin;
 
 impl Plugin for ApplePlugin {
@@ -28,6 +30,7 @@ impl Plugin for ApplePlugin {
     }
 }
 
+/// System that initializes newly added apples.
 #[allow(clippy::type_complexity)]
 fn setup_new_apples(
     mut commands: Commands,
@@ -43,17 +46,20 @@ fn setup_new_apples(
             Name::new("Apple"),
             GameMarker,
             Attachable,
-            FamilyChild(entity),
             // We don't want to register all components from `SpatialBundle` in save files, so instead we only save
             // the transform and initialize a `SpatialBundle` with that transform each time its loaded.
             SpatialBundle::from_transform(*transform),
         ))
         .with_children(|p| {
-            let mut mesh_cmds = p.spawn(PbrBundle {
-                mesh: apple_resource.mesh.clone(),
-                material: apple_resource.material.clone(),
-                ..default()
-            });
+            let mut mesh_cmds = p.spawn((
+                Name::new("Apple - Mesh"),
+                PbrBundle {
+                    mesh: apple_resource.mesh.clone(),
+                    material: apple_resource.material.clone(),
+                    ..default()
+                },
+                FamilyChild(entity),
+            ));
             if disabled {
                 mesh_cmds.insert(TransparentMaterial);
             } else {
