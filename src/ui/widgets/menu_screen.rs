@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::ui::*;
 
-/// System that spawns the tool panel when entering the game
+/// Utility that spawns a menu screen node.
 pub fn spawn_menu_screen(
     commands: &mut Commands,
     bundle: impl Bundle,
@@ -39,6 +39,7 @@ pub fn spawn_menu_screen(
         });
 }
 
+/// Utility that spawns a heading styled for the menu screen.
 pub fn spawn_menu_screen_heading(
     text: impl Into<String>,
     bundle: impl Bundle,
@@ -47,6 +48,7 @@ pub fn spawn_menu_screen_heading(
     spawn_text_heading(text, FONT_SIZE_LG, 10., bundle, child_builder)
 }
 
+/// Utility that spawns a text node styled for the menu screen.
 pub fn spawn_menu_screen_text(
     text: impl Into<String>,
     bundle: impl Bundle,

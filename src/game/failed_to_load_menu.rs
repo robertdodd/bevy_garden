@@ -68,7 +68,7 @@ fn on_leave_menu(mut next_menu_state: ResMut<NextState<MenuState>>) {
     next_menu_state.set(MenuState::None);
 }
 
-/// System that spawns the tool panel when entering the game
+/// System that spawns the tool panel when entering `MenuState::FailedToLoad`
 fn setup_menu(mut commands: Commands, button_style: Res<ToolButtonStyle>) {
     error!("Setup failed to load menu");
 
@@ -109,7 +109,7 @@ fn setup_menu(mut commands: Commands, button_style: Res<ToolButtonStyle>) {
     );
 }
 
-/// System that menu button click actions
+/// System that handles click events for buttons on the failed to load menu
 #[allow(clippy::type_complexity)]
 fn handle_button_interaction_actions(
     mut query: Query<(&FailedToLoadButtonAction, &Interaction), Changed<Interaction>>,

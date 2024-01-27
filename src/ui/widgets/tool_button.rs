@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::ui::*;
 
-/// Plugin that handles the tool panel buttons
+/// Plugin that handles tool buttons
 pub struct ToolButtonPlugin;
 
 impl Plugin for ToolButtonPlugin {
@@ -12,11 +12,11 @@ impl Plugin for ToolButtonPlugin {
     }
 }
 
-/// A tool button in the tool panel
+/// A tool button. Must be added to a UI node.
 #[derive(Component)]
 struct ToolButton;
 
-/// Resource that holds the styling for tool panel buttons
+/// Resource that holds styling for tool buttons
 #[derive(Resource)]
 pub struct ToolButtonStyle {
     default_background: Color,
@@ -64,7 +64,7 @@ fn handle_button_interaction_styles(
     }
 }
 
-/// Utility that spawns a single tool button
+/// Utility that spawns a tool button
 pub fn spawn_tool_button(
     text: impl Into<String>,
     bundle: impl Bundle,
