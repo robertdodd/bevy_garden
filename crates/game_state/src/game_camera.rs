@@ -7,9 +7,9 @@ use crate::prelude::*;
 /// It automatically spawns a GameCamera when you enter the game.
 ///
 /// While this example does not include it, this is where you would handle the following:
-/// - Set up camera depending on graphics settings (anti-aliasing, bloom, tone-mapping)
+/// - Set up camera depending on graphics settings (antialiasing, bloom, tone-mapping)
 /// - Handle camera movement (velocity, following players etc.)
-/// - Handle camera boundaries to prevent the camera from leaving the sccene.
+/// - Handle camera boundaries to prevent the camera from leaving the scene.
 pub struct GameCameraPlugin;
 
 impl Plugin for GameCameraPlugin {

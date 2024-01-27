@@ -16,7 +16,7 @@ impl Plugin for FlowerPlugin {
             init_resource::<FlowerResource>,
         )
         // Flowers should be setup in the `SetupSet::Attachable` so that their parent can be set up first.
-        // NOTE: its not important in this example, but if you are using a physics engine then its important for
+        // NOTE: its not important in this example, but if you are using a physics engine then it's important for
         // RigidBodies/Joints to be spawned in the correct order.
         .add_systems(Update, setup_new_apples.in_set(SetupSet::Attachable))
         .register_saveable::<Flower>();
@@ -32,7 +32,7 @@ fn setup_new_apples(
     for (entity, transform, disabled) in query.iter() {
         info!("[Flower] ==> Setup new flower");
 
-        // setup the apple
+        // Set up the apple
         let mut cmds = commands.entity(entity);
         cmds.insert((
             Name::new("Flower"),

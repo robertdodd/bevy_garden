@@ -6,7 +6,7 @@ pub enum PlayState {
     None,
     // Load assets here
     LoadAssets,
-    // Setup sysytems related to assets from the previous state here. E.g. Setup resources referencing the assets,
+    // Setup systems related to assets from the previous state here. E.g. Setup resources referencing the assets,
     // update texture asset formats etc.
     SetupAssets,
     // Setup resources, mainly for resources that implement `FromWorld`

@@ -5,10 +5,10 @@ use crate::types::CaptureObjectToSceneResult;
 
 /// Command that extracts a scene from an entity and emits a `PickSceneResult` event when done.
 ///
-/// The entire heirarchy of the entity is read and all resulting entities are captured to a scene, and all entities in
+/// The entire hierarchy of the entity is read and all resulting entities are captured to a scene, and all entities in
 /// the scene are centered before saving it to the asset server.
 ///
-/// The `PickSceneResult` event constains a `Result<Handle<DynamicScene>, String>`, which contains a handle to the
+/// The `PickSceneResult` event contains a `Result<Handle<DynamicScene>, String>`, which contains a handle to the
 /// captured scene if successful, an error message otherwise.
 #[derive(Debug)]
 pub(crate) struct CaptureObjectToScene {
@@ -28,7 +28,7 @@ impl Command for CaptureObjectToScene {
             // 2D platformer, we might center them along the XY axes.
             center_entities_in_scene(&mut scene, Vec3::new(1.0, 0.0, 1.0));
 
-            // If using a physics engine, you should clear any `Velocity` components in the sccene
+            // If using a physics engine, you should clear any `Velocity` components in the scene
             // set_velocity_in_scene(&mut scene, Vec2::ZERO, 0.0);
 
             // create a dynamic scene from the scene

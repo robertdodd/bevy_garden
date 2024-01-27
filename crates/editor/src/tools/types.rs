@@ -56,7 +56,7 @@ pub struct PrefabAttachableConfig {
     /// Offset the object from the surface its placed on, in the direction of the surface normal.
     pub distance: f32,
     /// The forward direction of the object. Orients the object so this vector faces in the direction of the surface
-    /// normal that its placed on.
+    /// normal that it's placed on.
     pub forward: Vec3,
 }
 

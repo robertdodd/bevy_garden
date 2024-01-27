@@ -13,13 +13,13 @@ pub struct ApplePlugin;
 impl Plugin for ApplePlugin {
     fn build(&self, app: &mut App) {
         app
-            // Setup the `FromWorld` resource in the appropriate state
+            // Set up the `FromWorld` resource in the appropriate state
             .add_systems(
                 OnEnter(PlayState::SetupResources),
                 init_resource::<AppleResource>,
             )
             // Apples should be setup in the `SetupSet::Attachable` so that their parent can be set up first.
-            // NOTE: its not important in this example, but if you are using a physics engine then its important for
+            // NOTE: its not important in this example, but if you are using a physics engine then it's important for
             // RigidBodies/Joints to be spawned in the correct order.
             .add_systems(Update, setup_new_apples.in_set(SetupSet::Attachable))
             // Register the types that should be included in save files.
@@ -37,7 +37,7 @@ fn setup_new_apples(
     for (entity, transform, disabled) in query.iter() {
         info!("Setup new apple");
 
-        // setup the apple
+        // Set up the apple
         let mut cmds = commands.entity(entity);
         cmds.insert((
             Name::new("Apple"),

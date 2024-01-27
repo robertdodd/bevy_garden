@@ -105,7 +105,7 @@ fn handle_place_attachable_events(
             // Spawn the scene
             // NOTE: We use a custom command to spawn the scene because it allows us to operate on the scene before it
             // is spawned (updating positions, clearing velocities, change layers etc.).
-            // Using `DynamicSceneBundle`s can cause issues because of their heirachies -- it's much cleaner if you
+            // Using `DynamicSceneBundle`s can cause issues because of their hierarchies -- it's much cleaner if you
             // know that all top-level objects in the game do not have a parent.
             commands.add(SpawnPrefabCommand {
                 tool_name: prefab_tool.name.clone(),
@@ -131,7 +131,7 @@ fn handle_place_object_events(
             // Spawn the scene
             // NOTE: We use a custom command to spawn the scene because it allows us to operate on the scene before it
             // is spawned (updating positions, clearing velocities, change layers etc.).
-            // Using `DynamicSceneBundle`s can cause issues because of their heirachies -- it's much cleaner if you
+            // Using `DynamicSceneBundle`s can cause issues because of their hierarchies -- it's much cleaner if you
             // know that all top-level objects in the game do not have a parent.
             commands.add(SpawnPrefabCommand {
                 tool_name: prefab_tool.name.clone(),
@@ -207,7 +207,7 @@ fn handle_tool_change_events(
     for event in events.read() {
         if let Tool::Prefab(config) = &event.0 {
             commands.insert_resource(PrefabToolConfig(config.clone()));
-            // if the prefab tool is already activated for a different tool, we transition the the "reload" state which
+            // if the prefab tool is already activated for a different tool, we transition the "reload" state which
             // will trigger the tool/scene to reload and reset the cursor.
             // As far as I know that can't happen in this example, but it's good to handle it in case that changes.
             if *state.get() == PrefabToolState::Active {

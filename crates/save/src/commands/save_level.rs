@@ -10,7 +10,7 @@ use {
 
 /// Command that saves the level to a file.
 ///
-/// * `filename` - Filename relative the the assets folder. NOTE: do not include the "assets/" prefix.
+/// * `filename` - Filename relative to the asset folder. NOTE: do not include the "assets/" prefix.
 #[derive(Debug)]
 pub(crate) struct SaveLevelCommand {
     pub(crate) filename: String,

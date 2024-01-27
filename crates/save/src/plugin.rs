@@ -17,7 +17,7 @@ impl Plugin for SavePlugin {
             .add_event::<RollbackForwardEvent>()
             .add_event::<RollbackClearEvent>()
             .add_event::<SaveResult>()
-            // Register our types as inspectable
+            // Register our types as inspect-able
             .register_type::<Saveable>()
             .register_type::<DespawnOnLoad>()
             // Register core types as saveable
@@ -53,28 +53,6 @@ fn handle_rollback_save_events(
     }
 }
 
-/// Applies the previous rollback (Undo action)
-#[allow(clippy::type_complexity)]
-fn handle_rollback_back_events(
-    mut commands: Commands,
-    mut rollback_events: EventReader<RollbackBackEvent>,
-    query: Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
-    mut rollbacks: ResMut<Rollbacks>,
-    mut result_events: EventWriter<SaveResult>,
-) {
-    for _ in rollback_events.read() {
-        let result = apply_rollback(&mut commands, &query, &mut rollbacks, 1);
-        if result.is_ok() {
-            result_events.send(SaveResult::RollbackApply(Ok(())))
-        } else {
-            error!("No more rollbacks");
-            result_events.send(SaveResult::RollbackApply(Err(
-                "No more rollbacks".to_string()
-            )))
-        }
-    }
-}
-
 #[allow(clippy::type_complexity)]
 fn handle_rollback_load_events(
     mut commands: Commands,
@@ -100,6 +78,26 @@ fn handle_rollback_load_events(
     }
 }
 
+/// Applies the previous rollback (Undo action)
+#[allow(clippy::type_complexity)]
+fn handle_rollback_back_events(
+    mut commands: Commands,
+    mut rollback_events: EventReader<RollbackBackEvent>,
+    query: Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
+    mut rollbacks: ResMut<Rollbacks>,
+    mut save_result_writer: EventWriter<SaveResult>,
+) {
+    for _ in rollback_events.read() {
+        apply_rollback_event(
+            1,
+            &mut commands,
+            &query,
+            &mut rollbacks,
+            &mut save_result_writer,
+        );
+    }
+}
+
 /// Applies the next rollback (Redo action)
 #[allow(clippy::type_complexity)]
 fn handle_rollback_forward_events(
@@ -107,19 +105,36 @@ fn handle_rollback_forward_events(
     mut rollback_events: EventReader<RollbackForwardEvent>,
     query: Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
     mut rollbacks: ResMut<Rollbacks>,
-    mut result_events: EventWriter<SaveResult>,
+    mut save_result_writer: EventWriter<SaveResult>,
 ) {
     for _ in rollback_events.read() {
-        let result = apply_rollback(&mut commands, &query, &mut rollbacks, -1);
-        if result.is_ok() {
-            result_events.send(SaveResult::RollbackApply(Ok(())))
-        } else {
-            // TODO: Fix success/fail messages
-            error!("No more rollbacks");
-            result_events.send(SaveResult::RollbackApply(Err(
-                "No more rollbacks".to_string()
-            )))
-        }
+        apply_rollback_event(
+            -1,
+            &mut commands,
+            &query,
+            &mut rollbacks,
+            &mut save_result_writer,
+        );
+    }
+}
+
+/// Utility to apply a rollback and handle the result. Used by the systems that handle rollback events.
+#[allow(clippy::type_complexity)]
+fn apply_rollback_event(
+    direction: isize,
+    commands: &mut Commands,
+    query: &Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
+    rollbacks: &mut ResMut<Rollbacks>,
+    save_result_writer: &mut EventWriter<SaveResult>,
+) {
+    let result = apply_rollback(commands, query, rollbacks, direction);
+    if result.is_ok() {
+        save_result_writer.send(SaveResult::RollbackApply(Ok(())))
+    } else {
+        error!("No more rollbacks");
+        save_result_writer.send(SaveResult::RollbackApply(Err(
+            "No more rollbacks".to_string()
+        )))
     }
 }
 
@@ -155,7 +170,7 @@ fn handle_load_events(
         // Despawn all saveable/despawn-on-load entities
         despawn_saveable_entities(&mut commands, &query);
 
-        // tell the asset server to reload the asset so we get a fresh copy in case it has been changed recently
+        // tell the asset server to reload the asset, so we get a fresh copy in case it has been changed recently
         asset_server.reload(event.filename.clone());
 
         // insert a `PendingLevelLoad` resource, which will apply the level to the world after it has finished loading

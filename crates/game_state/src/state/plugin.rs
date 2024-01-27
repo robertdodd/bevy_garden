@@ -26,7 +26,7 @@ use crate::prelude::*;
 ///   - Immediately transitions to the next state.
 /// - Loading
 ///   - Handled manually, usually to load the level.
-///   - Initated by `OnEnter(PlayState::SetupResources)`
+///   - Initiated by `OnEnter(PlayState::SetupResources)`
 ///   - Responsible for loading the current level if applicable, or setting it up.
 ///   - Should transition to `PlayState::SetupLevel` if successful, `PlayState::FailedToLoad` otherwise. Can also skip
 ///   - directly to `PlayState::Play` or `PlayState::Pause`.
@@ -90,7 +90,7 @@ impl Plugin for StatePlugin {
     }
 }
 
-/// Maximum number of entities to despawn per frame when despawning the level
+/// Maximum number of entities to despawn per frame when de-spawning the level
 const DESPAWN_COUNT_PER_FRAME: usize = 10;
 
 /// System which reads `PauseEvent` events and toggles `PauseState`.
@@ -103,8 +103,8 @@ fn handle_pause_events(
     }
 }
 
-/// System which despawns entities in small batches each frame. This prevents the game freezing on a single frame when
-/// despawning a large level.
+/// System which de-spawns entities in small batches each frame. This prevents the game freezing on a single frame when
+/// de-spawning a large level.
 fn despawn_game_entities(mut commands: Commands, query: Query<Entity, With<GameMarker>>) {
     let mut count: usize = 0;
     for entity in query.iter() {
@@ -116,7 +116,7 @@ fn despawn_game_entities(mut commands: Commands, query: Query<Entity, With<GameM
     }
 }
 
-/// System which runs in `GameState::ExitGame`. It waits until all game entities have finished despawning before
+/// System which runs in `GameState::ExitGame`. It waits until all game entities have finished de-spawning before
 /// transitioning to `GameState::Menu`.
 fn update_despawn_state(
     query: Query<Entity, With<GameMarker>>,
@@ -143,7 +143,7 @@ fn transition_to_play_asset_loading(mut next_play_state: ResMut<NextState<PlaySt
     next_play_state.set(PlayState::LoadAssets);
 }
 
-/// System which runs in `GameState::ReloadLevel`. It waits until all game entities have finished despawning before
+/// System which runs in `GameState::ReloadLevel`. It waits until all game entities have finished de-spawning before
 /// transitioning to `GameState::Game` and transitioning to the first stage of `PlayState`.
 fn handle_reload_level_complete(
     query: Query<Entity, With<GameMarker>>,

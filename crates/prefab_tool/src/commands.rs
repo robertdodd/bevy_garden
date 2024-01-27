@@ -60,7 +60,7 @@ impl Command for SpawnPrefabCommand {
                     .map_err(|err| format!("{err:?}"))
                     .expect("failed");
 
-                // handle reparenting, reparent all entities that were spawned by getting them from the entity map
+                // handle re-parenting, re-parent all entities that were spawned by getting them from the entity map
                 if let Some(parent) = self.parent {
                     for entity in entity_map.values() {
                         if let Some(mut entity_mut) = world.get_entity_mut(*entity) {

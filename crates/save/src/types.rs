@@ -12,13 +12,13 @@ pub(crate) struct PendingLevelLoad {
 #[reflect(Component)]
 pub struct Saveable;
 
-/// marker component for entities that should be despawned on load
+/// marker component for entities that should be de-spawned on load
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
 pub struct DespawnOnLoad;
 
 /// Location from which to save/load levels.
-/// Game assets should be saved/loaded from the `Assets` location, while end-user content should be save/loaded from
+/// Game assets should be saved/loaded from the `Assets` location, while end-user content should be saved/loaded from
 /// the `Workspace` location.
 #[derive(Clone, Copy)]
 pub enum StorageLocation {

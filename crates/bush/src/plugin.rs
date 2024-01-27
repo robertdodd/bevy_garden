@@ -27,8 +27,8 @@ impl Plugin for BushPlugin {
     }
 }
 
-/// Spawn a bush mesh as a separate entity to test support for the custom `Family` heirarchy.
-/// This is just an example. There is no need for the meshes to be separate entities outside the bevy heirarchy.
+/// Spawn a bush mesh as a separate entity to test support for the custom `Family` hierarchy.
+/// This is just an example. There is no need for the meshes to be separate entities outside the bevy hierarchy.
 /// Usually, we'd only have separate entities with more complex meshes, or with an object made up of separate
 /// colliders/joints when using a physics engine.
 fn spawn_mesh(
@@ -103,7 +103,7 @@ fn setup_new_bushes(
             }
         }
 
-        // setup the tree
+        // set up the tree
         let mut cmds = commands.entity(entity);
         cmds.insert((
             Name::new("Bush"),

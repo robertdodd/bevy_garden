@@ -35,7 +35,7 @@ impl Plugin for FailedToLoadMenuPlugin {
 }
 
 /// State for the menu we're on. It should only apply while we are in `GameState::Menu`.
-/// NOTE: Usually this would be in "menu" plugin, but this is the only menu in this example so we have it here.
+/// NOTE: Usually this would be in "menu" plugin, but this is the only menu in this example, so we have it here.
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum MenuState {
     #[default]
@@ -43,7 +43,7 @@ pub enum MenuState {
     FailedToLoad,
 }
 
-/// Marker component for despawning the tool panel
+/// Marker component for de-spawning the tool panel
 #[derive(Component)]
 struct OnFailedToLoadMenu;
 

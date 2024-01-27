@@ -4,7 +4,7 @@ use game_state::prelude::*;
 use save::prelude::*;
 
 /// Plugin which handles `DespawnEntityAndRelations` events, which despawn an entity and any related entities part of
-/// it's "family" (i.e. related entities not in the bevy heirarchy).
+/// it's "family" (i.e. related entities not in the bevy hierarchy).
 pub struct DeleteEventPlugin;
 
 impl Plugin for DeleteEventPlugin {

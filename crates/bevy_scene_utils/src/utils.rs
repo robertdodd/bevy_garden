@@ -118,8 +118,8 @@ pub fn get_highest_parent_from_world(world: &mut World, entity: Entity) -> Entit
     current
 }
 
-/// Get all entities in the heirarchy from an entity in a world.
-pub fn get_heirarchy_entities_from_world(world: &mut World, entity: Entity) -> Vec<Entity> {
+/// Get all entities in the hierarchy from an entity in a world.
+pub fn get_hierarchy_entities_from_world(world: &mut World, entity: Entity) -> Vec<Entity> {
     let parent = get_highest_parent_from_world(world, entity);
     recursively_get_children_from_world(world, parent)
 }
@@ -128,8 +128,8 @@ pub fn get_heirarchy_entities_from_world(world: &mut World, entity: Entity) -> V
 pub fn get_entity_family_from_world(world: &mut World, entity: Entity) -> Vec<Entity> {
     let mut connector_query = (*world).query::<&HasConnector>();
 
-    // TODO: Make this more efficient. We should not traverse the same heirarchy twice.
-    let mut entities = get_heirarchy_entities_from_world(world, entity);
+    // TODO: Make this more efficient. We should not traverse the same hierarchy twice.
+    let mut entities = get_hierarchy_entities_from_world(world, entity);
     let mut count = 0;
     while count < entities.len() {
         let entity = entities[count];
@@ -139,8 +139,8 @@ pub fn get_entity_family_from_world(world: &mut World, entity: Entity) -> Vec<En
             .ok();
         if let Some(connected) = connected {
             for &entity in connected.iter() {
-                let connector_heirarchy = get_heirarchy_entities_from_world(world, entity);
-                for entity in connector_heirarchy {
+                let connector_hierarchy = get_hierarchy_entities_from_world(world, entity);
+                for entity in connector_hierarchy {
                     if !entities.contains(&entity) {
                         entities.push(entity);
                     }
