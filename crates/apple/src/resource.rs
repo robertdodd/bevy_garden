@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-/// Resource holding the shared mesh and material used by all apples
+/// The size of an apple mesh
+pub(crate) const APPLE_MESH_SIZE: f32 = 1.0;
+
+/// Resource holding the shared mesh and material used by apples
 #[derive(Resource)]
 pub(crate) struct AppleResource {
     pub mesh: Handle<Mesh>,
@@ -13,11 +16,8 @@ impl FromWorld for AppleResource {
         let mut materials = cell.resource_mut::<Assets<StandardMaterial>>();
         let mut meshes = cell.resource_mut::<Assets<Mesh>>();
 
-        // The size of the apple mesh
-        let size = 1.0;
-
         Self {
-            mesh: meshes.add(shape::Cube::new(size).into()),
+            mesh: meshes.add(shape::Cube::new(APPLE_MESH_SIZE).into()),
             material: materials.add(Color::RED.into()),
         }
     }
