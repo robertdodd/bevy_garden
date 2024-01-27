@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::ui::*;
 
-/// System that spawns the tool panel when entering the game
+/// Utility that spawns a tool panel node.
 pub fn spawn_tool_panel(
     commands: &mut Commands,
     bundle: impl Bundle,
@@ -32,6 +32,7 @@ pub fn spawn_tool_panel(
         });
 }
 
+/// Utility that spawns a heading styled for a tool panel.
 pub fn spawn_tool_panel_heading(
     text: impl Into<String>,
     bundle: impl Bundle,

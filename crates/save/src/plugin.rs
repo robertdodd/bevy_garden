@@ -2,6 +2,7 @@ use bevy::{asset::LoadState, prelude::*};
 
 use super::{app::AppSaveableExt, commands::*, events::*, rollbacks::Rollbacks, types::*};
 
+/// Plugin that adds saving and loading to an app.
 pub struct SavePlugin;
 
 impl Plugin for SavePlugin {
