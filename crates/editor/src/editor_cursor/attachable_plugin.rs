@@ -3,7 +3,7 @@ use bevy_mod_raycast::prelude::*;
 
 use game_state::prelude::*;
 
-use crate::prelude::pick_entity_from_raycast;
+use crate::prelude::{get_camera_and_cursor_pos, pick_entity_from_raycast};
 
 use super::{cursor_not_blocked, EditorCursorSet};
 
@@ -166,16 +166,7 @@ fn get_non_intersecting_transform(
     scale: Vec3,
     forward: Vec3,
 ) -> Option<Transform> {
-    let camera_and_cursor_pos = windows
-        .get_single()
-        .ok()
-        .and_then(|window| window.cursor_position())
-        .and_then(|cursor_pos| {
-            camera_query
-                .get_single()
-                .ok()
-                .map(|(camera, camera_transform)| (camera, camera_transform, cursor_pos))
-        });
+    let camera_and_cursor_pos = get_camera_and_cursor_pos(windows, camera_query);
 
     // STYLE: We could string this together with above, but it saves an indentation level like this
     camera_and_cursor_pos.and_then(|(camera, camera_transform, cursor_pos)| {

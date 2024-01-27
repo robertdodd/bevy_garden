@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-/// The global registry of snapshots used for rollback / rollforward.
+/// The global registry of snapshots used for roll back/forward.
 #[derive(Resource, Default)]
 pub struct Rollbacks {
     pub(crate) checkpoints: Vec<Handle<DynamicScene>>,
@@ -40,7 +40,7 @@ impl Rollbacks {
 
     /// Given a new [`Rollback`], insert it and set it as the currently active rollback.
     ///
-    /// If you rollback and then insert a checkpoint, it will erase all rollforward snapshots.
+    /// If you roll back and then insert a checkpoint, it will erase all forward snapshots.
     pub fn push_checkpoint(&mut self, scene: Handle<DynamicScene>) {
         let active = self.active.unwrap_or(0);
 

@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use game_state::prelude::*;
 
+use crate::prelude::get_camera_and_cursor_pos;
+
 use super::{cursor_not_blocked, EditorCursorSet};
 
 /// Plugin which handles cursors that place objects on the ground.
@@ -42,17 +44,7 @@ fn update_cursor_position(
     windows: Query<&Window>,
 ) {
     for mut transform in query.iter_mut() {
-        let camera_and_cursor = windows
-            .get_single()
-            .ok()
-            .and_then(|window| window.cursor_position())
-            .and_then(|cursor_pos| {
-                camera_query
-                    .get_single()
-                    .ok()
-                    .map(|(camera, camera_transform)| (camera, camera_transform, cursor_pos))
-            });
-
+        let camera_and_cursor = get_camera_and_cursor_pos(&windows, &camera_query);
         let new_translation =
             camera_and_cursor.and_then(|(camera, camera_transform, cursor_pos)| {
                 camera

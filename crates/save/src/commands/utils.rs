@@ -50,7 +50,7 @@ pub(crate) fn apply_rollback(
     }
 }
 
-// This function is public so it can be conveniently used by the client.
+// This function is public, so it can be conveniently used by the client.
 /// Creates the full directory path to a filename.
 ///
 /// * `filename` - Path to a file, relative to the "assets" directory. This must be the path to a file and not to a

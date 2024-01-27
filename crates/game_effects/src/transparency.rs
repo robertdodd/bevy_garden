@@ -53,7 +53,7 @@ fn update_transparent_material(
         if transparent_material
             .is_some_and(|transparent_material| *material_handle == transparent_material.disabled)
         {
-            // material is up to date, ignore
+            // material is up-to-date, ignore
             warn!("transparent material up to date, skipping");
             continue;
         }
@@ -77,7 +77,7 @@ fn update_transparent_material(
     }
 }
 
-/// Reverts an entities material to it's original handle when the `Transparency` component is removed
+/// Reverts an entities material to its original handle when the `Transparency` component is removed
 fn revert_transparent_material(
     mut commands: Commands,
     mut query: Query<

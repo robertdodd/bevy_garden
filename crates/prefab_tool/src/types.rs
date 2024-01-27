@@ -10,7 +10,7 @@ pub(crate) struct PrefabToolCursor {
     pub scaling: Option<ToolScaling>,
 }
 
-/// Marker component for the despawning the tag tool
+/// Marker component for the de-spawning the tag tool
 #[derive(Component, Clone)]
 pub(crate) struct OnPrefabTool;
 

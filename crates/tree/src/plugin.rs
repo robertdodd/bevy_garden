@@ -13,14 +13,14 @@ pub struct TreePlugin;
 impl Plugin for TreePlugin {
     fn build(&self, app: &mut App) {
         app
-            // Setup the `FromWorld` resource in the appropriate state
+            // Set up the `FromWorld` resource in the appropriate state
             .add_systems(
                 OnEnter(PlayState::SetupResources),
                 init_resource::<TreeResource>,
             )
             // Trees should be setup in the `SetupSet::RigidBody` set because they are top-level objects, and need to be
-            // set up before before any attachables that may be attached to them.
-            // NOTE: its not important in this example, but if you are using a physics engine then its important for
+            // set up before any attachables that may be attached to them.
+            // NOTE: its not important in this example, but if you are using a physics engine then it's important for
             // RigidBodies/Joints to be spawned in the correct order.
             .add_systems(Update, setup_new_trees.in_set(SetupSet::RigidBody))
             // Register the types that should be included in save files.

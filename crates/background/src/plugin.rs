@@ -25,7 +25,7 @@ fn setup_new_backgrounds(
     for (entity, background, disabled) in query.iter() {
         info!("[Background] ==> Setup new background");
 
-        // Setup the clear color resource
+        // Set up the clear color resource
         commands.insert_resource(ClearColor(background.background_color));
 
         // Enable ambient lighting

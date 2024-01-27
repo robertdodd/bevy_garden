@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ui::FONT_SIZE_LG;
+use crate::ui::*;
 
 /// System that spawns the tool panel when entering the game
 pub fn spawn_tool_panel(
@@ -37,26 +37,5 @@ pub fn spawn_tool_panel_heading(
     bundle: impl Bundle,
     child_builder: &mut ChildBuilder,
 ) -> Entity {
-    child_builder
-        .spawn((
-            NodeBundle {
-                style: Style {
-                    margin: UiRect::bottom(Val::Px(10.)),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                ..default()
-            },
-            bundle,
-        ))
-        .with_children(|p| {
-            p.spawn(TextBundle::from_section(
-                text,
-                TextStyle {
-                    font_size: FONT_SIZE_LG,
-                    ..default()
-                },
-            ));
-        })
-        .id()
+    spawn_text_heading(text, FONT_SIZE_LG, 10., bundle, child_builder)
 }

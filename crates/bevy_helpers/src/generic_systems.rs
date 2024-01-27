@@ -9,7 +9,7 @@ pub fn despawn_recursive_with<T: Component>(
         commands.entity(entity).despawn_recursive();
     }
     info!(
-        "despawn_components({}) ==> despawned {} entities",
+        "despawn_components({}) ==> de-spawned {} entities",
         std::any::type_name::<T>(),
         to_despawn.iter().len(),
     );

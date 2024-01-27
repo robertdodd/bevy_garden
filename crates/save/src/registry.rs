@@ -16,7 +16,7 @@ impl SaveableRegistry {
             .insert(type_reg.type_info().type_path().into(), true);
     }
 
-    /// Returns whether or not a type name is registered in the [`SaveableRegistry`].
+    /// Returns whether a type name is registered in the [`SaveableRegistry`].
     pub fn contains(&self, type_name: &str) -> bool {
         self.types.contains_key(type_name)
     }

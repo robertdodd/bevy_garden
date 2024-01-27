@@ -12,7 +12,7 @@ use crate::{commands::CaptureObjectToScene, types::*};
 ///
 /// The duplicate tool lets you select an object and then place that object multiple times in the world.
 ///
-/// It works by extracting the object to a scene (it extracts the entire object heirarchy) and transitions to the
+/// It works by extracting the object to a scene (it extracts the entire object hierarchy) and transitions to the
 /// "Prefab" tool to place the object.
 pub struct DuplicateToolPlugin;
 
@@ -79,7 +79,7 @@ fn handle_mouse_click(
     }
 
     for _ in query.iter() {
-        // pick an entity from the raycast, and make sure it matches `valid_target_query` and does not contains a
+        // pick an entity from the raycast, and make sure it matches `valid_target_query` and does not contain a
         // `StaticLocked` component.
         let target_entity = pick_entity_from_raycast(
             &cursor_ray,

@@ -4,7 +4,7 @@
 //! crates/modules.
 use bevy::{prelude::*, reflect::Reflect};
 
-/// Marker component for despawning all game entities when exiting the game state
+/// Marker component for de-spawning all game entities when exiting the game state
 #[derive(Component, Clone)]
 pub struct GameMarker;
 
@@ -31,7 +31,7 @@ pub struct PhysicsBody;
 
 /// Marker component for objects that must be attached to a parent object.
 ///
-/// These entities should always be added as a child via the bevy heirarchy.
+/// These entities should always be added as a child via the bevy hierarchy.
 #[derive(Component, Debug)]
 pub struct Attachable;
 
@@ -70,7 +70,7 @@ pub struct PickableBlock;
 #[reflect(Component)]
 pub struct AcceptsAttachables;
 
-/// Marks a component as a parent made up of a number of other entities that are not part of it's heirarchy.
+/// Marks a component as a parent made up of a number of other entities that are not part of its hierarchy.
 ///
 /// This allows the external entities to be discovered, for example when adding wireframes, as well as to be deleted
 /// when the parent is deleted.

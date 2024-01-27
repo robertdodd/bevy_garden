@@ -1,6 +1,6 @@
 # Bevy Garden
 
-An simple `bevy` game where you plant trees in a garden, featuring a simple editor interface, common patterns
+A simple `bevy` game where you plant trees in a garden, featuring a simple editor interface, common patterns
 regarding state-management and multiple examples for interacting with bevy scenes.
 
 ---
@@ -17,14 +17,23 @@ cargo run
 
 This example showcases the following:
 
-* [Prefab tool](crates/prefab_tool/src) to place objects via [asset files](assets/tools).
-* [Pointer tool](crates/pointer_tool/src), a tool that can't be implemented via an asset file.
+* [Prefab tool](crates/prefab_tool/src) to place objects defined in [asset files](assets/tools) (a scene file and
+  config file for each tool).
+* [Duplicate tool](crates/duplicate_tool/src) to capture an object (and its hierarchy) and place it around the scene.
 * Tool library and tool stack.
 * Workspace crate organization ([crates](crates) directory).
 * Saving and loading, including undo/redo via ([crates/save](crates/save/src)).
 * Shared components, state transitions etc. in [crates/game_state](crates/game_state/src).
-* Multiple ways of spawning bevy scenes, including modifying scenes before spawning, spawning without using `DynamicSceneBundle`, and more. See [bevy_scene_utils](crates/bevy_scene_utils/src) and [prefab_tool](crates/prefab_tool/src/commands.rs).
-* Treat objects made up of multiple entities as a single object. See [crates/bush](crates/bush/src), and see how the `FamilyChild` and `ExternalRelations` components are used throughout the code.
+* Treat objects made up of multiple entities as a single object. See [crates/bush](crates/bush/src), and see how the
+  `FamilyChild` and `ExternalRelations` components are used throughout the code.
+* Multiple examples working with `bevy` scenes:
+  * Modifying scenes before spawning (centering, adding components etc.)
+  * Capturing objects to scenes
+  * Dealing with `Parent`/`Children` hierarchies in scenes
+  * Spawning scenes directly into the world without using `DynamicSceneBundle`
+  * Saving only the types you want
+  * See [bevy_scene_utils](crates/bevy_scene_utils/src), [save](crates/save/src),
+    [duplicate_tool](crates/duplicate_tool/src) and [prefab_tool](crates/prefab_tool/src/commands.rs).
 
 ## Third-Party Bevy Crates
 
@@ -40,18 +49,18 @@ It's relatively easy to add a new object type. Here's a roughly what to do:
 
 1. Add a crate for this object
    - E.g. duplicate the `crates/tree` crate
-   - Add to [Cargo.toml](Cargo.toml)
+   - Use to [Cargo.toml](Cargo.toml)
    - Add plugin in [src/main.rs](src/main.rs)
 2. Create tool asset files
    - E.g. duplicate `assets/tools/tree_large`
    - Modify `config.tool.ron` and `prefab.scn.ron` files to reference the new object
-   - Add tool to asset loader in [src/game/tool_loader.rs](src/game/tool_loader.rs).
+   - Add the assets to the [tool asset loader](src/game/tool_loader.rs).
 3. `cargo run` and it should work!
 
 ## Credits
 
 - [bevy_save](https://github.com/hankjordan/bevy_save) - I copied the idea of the `SaveableRegistry` and rollbacks
-  used in `crates/save` from this project.
+  from this project (see [save crate](crates/save/src)).
 
 ## License
 

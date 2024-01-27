@@ -21,7 +21,7 @@ impl Plugin for ToolPanelPlugin {
     }
 }
 
-/// Marker component for despawning the tool panel
+/// Marker component for de-spawning the tool panel
 #[derive(Component)]
 struct OnToolPanel;
 

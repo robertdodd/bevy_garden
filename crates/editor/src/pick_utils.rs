@@ -29,3 +29,19 @@ pub fn pick_entity_from_raycast(
         None
     }
 }
+
+pub fn get_camera_and_cursor_pos<'a>(
+    windows: &'a Query<&Window>,
+    camera_query: &'a Query<(&Camera, &GlobalTransform), With<GameCamera>>,
+) -> Option<(&'a Camera, &'a GlobalTransform, Vec2)> {
+    windows
+        .get_single()
+        .ok()
+        .and_then(|window| window.cursor_position())
+        .and_then(|cursor_pos| {
+            camera_query
+                .get_single()
+                .ok()
+                .map(|(camera, camera_transform)| (camera, camera_transform, cursor_pos))
+        })
+}
