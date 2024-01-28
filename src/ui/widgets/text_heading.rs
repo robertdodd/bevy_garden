@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-/// Utility for spawning a text heaading node
+/// Utility that spawns a text heading node
 pub fn spawn_text_heading(
     text: impl Into<String>,
     font_size: f32,

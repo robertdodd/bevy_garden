@@ -67,8 +67,8 @@ fn setup_new_bushes(
 
         // If this entity has a parent, then parent the meshes to it.
         // NOTE: This should only happen if the bush mesh is a child of a `DynamicScene`, as is the case when placing
-        // bushes using the prefab tool. This is important as it ensures all meshes will be despawned when that scene
-        // despawns.
+        // bushes using the prefab tool. This is important as it ensures all meshes will be de-spawned when that scene
+        // de-spawns.
         if let Some(parent) = parent {
             for mesh_entity in bush_meshes.iter() {
                 commands.entity(*mesh_entity).set_parent(parent.get());
@@ -131,9 +131,9 @@ fn spawn_mesh(
             transform: parent_transform.mul_transform(Transform::from_translation(local_anchor)),
             ..default()
         },
-        // Mark this mesh as a child belonging to the root `BushCluster` entity. This allows us to parent attachables to the
-        // root entity instead of to this mesh, which is important because this mesh won't be included in save files.
-        // Refer to the `prefab_tool` crate to see this in action when adding attachables.
+        // Mark this mesh as a child belonging to the root `BushCluster` entity. This allows us to parent attachables
+        // to the root entity instead of to this mesh, which is important because this mesh won't be included in save
+        // files. Refer to the `prefab_tool` crate to see this in action when adding attachables.
         FamilyChild(parent_entity),
     ));
 
