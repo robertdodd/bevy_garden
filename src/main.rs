@@ -17,11 +17,11 @@ use pointer_tool::prelude::PointerToolPlugin;
 use prefab_tool::prelude::PrefabToolPlugin;
 use save::prelude::*;
 use tree::prelude::TreePlugin;
-use ui::UiPlugin;
+use widgets::WidgetsPlugin;
 
 mod config;
 mod game;
-mod ui;
+mod widgets;
 
 fn main() {
     App::new()
@@ -70,7 +70,7 @@ fn main() {
         ))
         // first-party plugins for in-game menus (tool panel UI and failed-to-load menu), spawning the game and
         // loading the tool assets.
-        .add_plugins((GamePlugin, UiPlugin))
+        .add_plugins((GamePlugin, WidgetsPlugin))
         .add_systems(Startup, startup)
         .add_systems(Update, handle_keypress.run_if(in_state(PlayState::Active)))
         .run();
