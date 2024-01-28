@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::ui::*;
+use crate::config::FONT_SIZE_LG;
+
+use super::spawn_text_heading;
 
 /// Utility that spawns a tool panel node.
 pub fn spawn_tool_panel(

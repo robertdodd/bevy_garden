@@ -5,7 +5,7 @@ use editor::prelude::*;
 use game_state::prelude::*;
 use save::prelude::{RollbackBackEvent, RollbackForwardEvent};
 
-use crate::ui::*;
+use crate::widgets::*;
 
 /// Plugin that handles the tool panel while in the game.
 pub struct ToolPanelPlugin;

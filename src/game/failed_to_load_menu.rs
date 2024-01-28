@@ -3,7 +3,7 @@ use bevy::{app::AppExit, prelude::*};
 use bevy_helpers::generic_systems::{debug_state_changes, despawn_recursive_with};
 use game_state::prelude::*;
 
-use crate::ui::*;
+use crate::widgets::*;
 
 /// Plugin that spawns a "Failed to Load" menu when the game fails to load.
 ///
