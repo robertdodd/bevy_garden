@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::ui::*;
+use crate::config::{FONT_SIZE_BASE, FONT_SIZE_LG};
+use crate::ui::spawn_text_heading;
 
 /// Utility that spawns a menu screen node.
 pub fn spawn_menu_screen(

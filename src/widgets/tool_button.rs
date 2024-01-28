@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ui::*;
+use crate::config::FONT_SIZE_BASE;
 
 /// Plugin that handles tool buttons
 pub struct ToolButtonPlugin;
