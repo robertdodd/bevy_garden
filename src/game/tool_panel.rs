@@ -3,9 +3,12 @@ use bevy::prelude::*;
 use bevy_helpers::generic_systems::despawn_recursive_with;
 use editor::prelude::*;
 use game_state::prelude::*;
-use save::prelude::{RollbackBackEvent, RollbackForwardEvent};
+use save::{
+    prelude::{LoadEvent, RollbackBackEvent, RollbackForwardEvent, SaveEvent},
+    types::StorageLocation,
+};
 
-use crate::widgets::*;
+use crate::{config::SAVE_FILENAME, widgets::*};
 
 /// Plugin that handles the tool panel while in the game.
 pub struct ToolPanelPlugin;
@@ -31,6 +34,8 @@ enum ToolButtonAction {
     Tool(Tool),
     Undo,
     Redo,
+    Save,
+    Load,
 }
 
 /// System that spawns and handles the tool panel when in game
@@ -70,6 +75,22 @@ fn setup_tool_panel(
                 "Redo (CTRL + Y)",
                 ToolButtonAction::Redo,
                 &button_style,
+                false,
+                p,
+            );
+            spawn_tool_panel_heading("Save/Load", (), p);
+            spawn_tool_panel_text(format!("Filename: assets/{SAVE_FILENAME}"), (), p);
+            spawn_tool_button(
+                "Save (CTRL + S)",
+                ToolButtonAction::Save,
+                &button_style,
+                false,
+                p,
+            );
+            spawn_tool_button(
+                "Load (CTRL + L)",
+                ToolButtonAction::Load,
+                &button_style,
                 true,
                 p,
             );
@@ -84,6 +105,8 @@ fn handle_button_interactions(
     mut tool_stack: ResMut<ToolStack>,
     mut undo_writer: EventWriter<RollbackBackEvent>,
     mut redo_writer: EventWriter<RollbackForwardEvent>,
+    mut save_writer: EventWriter<SaveEvent>,
+    mut load_writer: EventWriter<LoadEvent>,
 ) {
     for (action, interaction) in query.iter_mut() {
         if *interaction == Interaction::Pressed {
@@ -94,6 +117,14 @@ fn handle_button_interactions(
                 }
                 ToolButtonAction::Undo => undo_writer.send(RollbackBackEvent),
                 ToolButtonAction::Redo => redo_writer.send(RollbackForwardEvent),
+                ToolButtonAction::Save => save_writer.send(SaveEvent {
+                    filename: SAVE_FILENAME.to_string(),
+                    location: StorageLocation::Assets,
+                }),
+                ToolButtonAction::Load => load_writer.send(LoadEvent {
+                    filename: SAVE_FILENAME.to_string(),
+                    location: StorageLocation::Assets,
+                }),
             }
         }
     }
