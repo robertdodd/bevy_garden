@@ -164,13 +164,9 @@ fn handle_save_events(mut commands: Commands, mut save_events: EventReader<SaveE
 fn handle_load_events(
     mut commands: Commands,
     mut load_events: EventReader<LoadEvent>,
-    query: Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
     asset_server: Res<AssetServer>,
 ) {
     for event in load_events.read() {
-        // Despawn all saveable/despawn-on-load entities
-        despawn_saveable_entities(&mut commands, &query);
-
         // tell the asset server to reload the asset, so we get a fresh copy in case it has been changed recently
         asset_server.reload(event.filename.clone());
 
@@ -182,10 +178,13 @@ fn handle_load_events(
     }
 }
 
+/// System that waits for a level asset to finish loading before writing it to the world.
+#[allow(clippy::type_complexity)]
 fn handle_pending_levels(
     mut commands: Commands,
     pending_level: Res<PendingLevelLoad>,
     asset_server: Res<AssetServer>,
+    query: Query<Entity, Or<(With<DespawnOnLoad>, With<Saveable>)>>,
     mut success_events: EventWriter<LevelLoadSuccess>,
     mut fail_events: EventWriter<LevelLoadFail>,
 ) {
@@ -193,15 +192,22 @@ fn handle_pending_levels(
     match load_state {
         Some(LoadState::Loaded) => {
             info!("Pending level loaded: {:?}", pending_level.path);
+
+            // Despawn all saveable/despawn-on-load entities
+            despawn_saveable_entities(&mut commands, &query);
+
+            // Write the scene to world
             let cmd = WriteSceneToWorldCommand {
                 scene_handle: pending_level.handle.clone(),
             };
             commands.add(cmd);
+
+            // Send the success event, and remove the pending level load resource
             success_events.send(LevelLoadSuccess(pending_level.path.clone()));
             commands.remove_resource::<PendingLevelLoad>();
         }
         Some(LoadState::Failed) => {
-            error!("Pending level failed: {:?}", pending_level.path);
+            error!("Failed to load level: {:?}", pending_level.path);
             fail_events.send(LevelLoadFail {
                 path: pending_level.path.clone(),
                 error: "Failed to load the level".to_string(),
