@@ -1,7 +1,9 @@
 # Bevy Garden
 
-A simple `bevy` game where you plant trees in a garden, featuring a simple editor interface, common patterns
-regarding state-management and multiple examples for interacting with bevy scenes.
+An example `bevy` game where you plant trees in a garden.
+
+This example demonstrates a simple editor interface, working with `bevy` scenes, saving/loading and common patterns
+regarding game state.
 
 ---
 
