@@ -11,6 +11,10 @@ use crate::types::CaptureObjectToSceneResult;
 ///
 /// The `PickSceneResult` event contains a `Result<Handle<DynamicScene>, String>`, which contains a handle to the
 /// captured scene if successful, an error message otherwise.
+///
+/// # Panics
+///
+/// Panics if the world does not contain `AppTypeRegistry`, `SaveableRegistry` or `Assets<DynamicScene>` resources.
 #[derive(Debug)]
 pub(crate) struct CaptureObjectToScene {
     pub entity: Entity,
@@ -34,9 +38,7 @@ impl Command for CaptureObjectToScene {
             // set_velocity_in_scene(&mut scene, Vec2::ZERO, 0.0);
 
             // create a dynamic scene asset from the scene
-            let mut assets = world
-                .get_resource_mut::<Assets<DynamicScene>>()
-                .expect("World does not have an Assets<DynamicScene> to add the new scene to");
+            let mut assets = world.resource_mut::<Assets<DynamicScene>>();
             let dynamic_scene_handle = assets.add(DynamicScene::from_scene(&scene));
 
             world.send_event(CaptureObjectToSceneResult(Ok(dynamic_scene_handle)));

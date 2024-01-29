@@ -47,6 +47,7 @@ fn handle_tool_assets(
     for handle in prefab_tools.tools.iter() {
         if let Some(tool_def) = tool_assets.get(handle) {
             // Define the path to the scene asset
+            // NOTE: Panics if the path is invalid or we can't get the parent
             let scene_path = handle
                 .path()
                 .unwrap()

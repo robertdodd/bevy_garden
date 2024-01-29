@@ -149,6 +149,10 @@ pub fn get_entity_family_from_world(world: &mut World, entity: Entity) -> Vec<En
 }
 
 /// Create a `DynamicScene` from an entity in a world.
+///
+/// # Panics
+///
+/// Panics if the world does not contain `AppTypeRegistry` or `SaveableRegistry` resources.
 pub fn saveable_scene_from_entity(
     world: &mut World,
     entity: Entity,
@@ -206,7 +210,9 @@ pub fn scene_from_world_dynamic_scene(
     let assets = world
         .get_resource::<Assets<DynamicScene>>()
         .expect("World does not have an Assets<DynamicScene>");
-    let dynamic_scene = assets.get(scene_handle).unwrap();
+    let dynamic_scene = assets
+        .get(scene_handle)
+        .ok_or("DynamicScene does not exist")?;
 
     // convert the `DynamicScene` to a `Scene`
     let type_registry = world.resource::<AppTypeRegistry>();
