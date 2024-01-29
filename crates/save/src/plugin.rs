@@ -26,7 +26,6 @@ impl Plugin for SavePlugin {
             // NOTE: Children components to be excluded because they may contain the IDs of entities which were not
             // saved. `WriteSceneToWorldCommand` MUST re-parent the entities after applying the scene.
             .register_saveable::<Transform>()
-            .register_saveable::<Name>()
             // Run systems after the update set. Not sure if this is best?
             .add_systems(
                 PostUpdate,
