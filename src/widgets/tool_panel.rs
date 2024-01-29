@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::config::FONT_SIZE_LG;
+use crate::config::*;
 
 use super::spawn_text_heading;
 
@@ -41,4 +41,13 @@ pub fn spawn_tool_panel_heading(
     child_builder: &mut ChildBuilder,
 ) -> Entity {
     spawn_text_heading(text, FONT_SIZE_LG, 10., bundle, child_builder)
+}
+
+/// Utility that spawns text styled for a tool panel.
+pub fn spawn_tool_panel_text(
+    text: impl Into<String>,
+    bundle: impl Bundle,
+    child_builder: &mut ChildBuilder,
+) -> Entity {
+    spawn_text_heading(text, FONT_SIZE_SM, 10., bundle, child_builder)
 }
