@@ -1,9 +1,9 @@
 use std::any::TypeId;
 
-use bevy::{prelude::*, scene::serde::SceneDeserializer};
+use bevy::{prelude::*, scene::serde::SceneDeserializer, utils::HashMap};
 
 use game_state::prelude::*;
-use save::{commands::utils::get_saveable_scene_filter_from_world, prelude::*};
+use save::prelude::*;
 use serde::de::DeserializeSeed;
 
 /// Normalizes the axes of a vector, so that each axes has a value of either 1.0 or 0.0.
@@ -14,11 +14,13 @@ fn normalize_axes(mut axes: Vec3) -> Vec3 {
     axes
 }
 
-/// Utility that centers the position of all entities in a scene
+/// Utility that centers the position of all entities in a scene along the specified axes.
 ///
-/// * `scene`: The scene to operate on
-/// * `axes`: The axes along which to center. Vec3::new(1.0, 1.0, 0.0) will only center objects along the X and Y axes.
-///           If any of the axes are greater than 0.0, they will be set to 1.0.
+/// # Arguments:
+///
+/// * `scene` - The scene to operate on
+/// * `axes` - The axes along which to center. Vec3::new(1.0, 1.0, 0.0) will only center objects along the X and Y axes.
+///     If any of the axes are greater than 0.0, they will be set to 1.0.
 pub fn center_entities_in_scene(scene: &mut Scene, mut axes: Vec3) {
     axes = normalize_axes(axes);
 
@@ -52,8 +54,6 @@ pub fn center_entities_in_scene(scene: &mut Scene, mut axes: Vec3) {
 
 /// Utility that adds a component to all entities in a scene
 pub fn add_component_to_all_entities_in_scene<C: Bundle + Clone>(scene: &mut Scene, bundle: C) {
-    // let mut query = scene.world.query_filtered::<Entity, Without<C>>();
-    // for e in query.iter_mut(&mut scene.world) {
     let entities: Vec<Entity> = scene.world.iter_entities().map(|e| e.id()).collect();
     for e in entities.iter() {
         scene.world.entity_mut(*e).insert(bundle.clone());
@@ -69,36 +69,27 @@ pub fn dynamic_scene_to_scene(
     let mut scene = Scene::from_dynamic_scene(dynamic_scene, type_registry)
         .map_err(|err| format!("{err:?}"))?;
     scene.world.insert_resource(type_registry.clone());
-
     Ok(scene)
 }
 
-/// Utility that creates a `DynamicScene` from a `Scene`
-pub fn scene_to_dynamic_scene(scene: &Scene) -> DynamicScene {
-    DynamicScene::from_scene(scene)
-}
-
-/// Utility that gets all children belonging to an entity from a world
+/// Utility that returns a vector of all children in an entity's hierarchy.
 pub fn recursively_get_children_from_world(world: &mut World, entity: Entity) -> Vec<Entity> {
+    // define a vector of all entities in the heirarchy, including `entity`.
+    let mut result = vec![entity];
+
+    // Reccursively add children for all entities in `result`.
+    // IMPORTANT: Verify the children exist first. `DynamicSceneBuilder::extract_entities` may panic otherwise.
+    // This is necessary because `Children` may contain non-existent entities after being de-serialized.
     let mut children_query = (*world).query::<&Children>();
-
-    // define the result vector, and add `entity` to it. It should contain at least one entity before starting the
-    // while loop below.
-    let mut result = Vec::<Entity>::new();
-    result.push(entity);
-
-    // loop through `result`, adding children for each entity until we reach the end
     let mut current = 0;
     while current < result.len() {
         let entity = result[current];
         if let Ok(children) = children_query.get(world, entity) {
-            for &child in children.iter() {
-                // Verify the entity exists. `DynamicSceneBuilder::extract_entities` will panic if one of the entities
-                // does not exist. This is necessary because `Children` may contain non-existent entities after being
-                // de-serialized.
-                if world.get_entity(child).is_some() {
-                    result.push(child);
-                }
+            for &child in children
+                .iter()
+                .filter(|child| world.get_entity(**child).is_some())
+            {
+                result.push(child);
             }
         }
         current += 1;
@@ -107,7 +98,7 @@ pub fn recursively_get_children_from_world(world: &mut World, entity: Entity) ->
     result
 }
 
-/// get the top-most parent entity for an entity in a world
+/// Utility that returns the top-most parent entity in a hierarchy.
 pub fn get_highest_parent_from_world(world: &mut World, entity: Entity) -> Entity {
     let mut parent_query = (*world).query::<&Parent>();
 
@@ -204,6 +195,73 @@ pub fn deserialize_scene(
     scene_deserializer
         .deserialize(&mut deserializer)
         .map_err(|err| format!("{err:?}"))
+}
+
+/// Creates a new scene from a dynamic scene asset in the world.
+pub fn scene_from_world_dynamic_scene(
+    scene_handle: impl Into<AssetId<DynamicScene>>,
+    world: &mut World,
+) -> Result<Scene, String> {
+    // read the dynamic scene
+    let assets = world
+        .get_resource::<Assets<DynamicScene>>()
+        .expect("World does not have an Assets<DynamicScene>");
+    let dynamic_scene = assets.get(scene_handle).unwrap();
+
+    // convert the `DynamicScene` to a `Scene`
+    let type_registry = world.resource::<AppTypeRegistry>();
+    dynamic_scene_to_scene(dynamic_scene, type_registry)
+}
+
+/// Utility that writes a dynamic scene to the world, and accepts a closure than gives mutable world acccess to each
+/// spawned entity.
+///
+/// # Examples:
+///
+/// ```ignore
+/// // Apply a transform and add a `Saveable` component to all spawned entities.
+/// write_dynamic_scene_to_world(&dynamic_scene, world, |mut entity_mut| {
+///     entity_mut.insert(Saveable);
+///     if let Some(mut transform) = entity_mut.get_mut::<Transform>() {
+///         *transform = new_transform.mul_transform(*transform);
+///     }
+/// });
+/// ```
+pub fn write_dynamic_scene_to_world(
+    dynamic_scene: &DynamicScene,
+    world: &mut World,
+    update_fn: impl Fn(&mut EntityWorldMut<'_>),
+) -> Result<(), String> {
+    let mut entity_map = HashMap::<Entity, Entity>::new();
+    dynamic_scene
+        .write_to_world(world, &mut entity_map)
+        .map_err(|err| format!("{err:?}"))?;
+
+    // Call `update_fn` for each entity that was spawned
+    for entity in entity_map.values() {
+        if let Some(mut entity_mut) = world.get_entity_mut(*entity) {
+            update_fn(&mut entity_mut);
+        }
+    }
+
+    Ok(())
+}
+
+/// Utility that writes a dynamic scene asset to the world from it's handle, and accepts a closure than gives mutable
+/// world acccess to each spawned entity.
+///
+/// Same as `write_dynamic_scene_to_world`, except it reads the `DynamicScene` asset first.
+pub fn write_dynamic_scene_asset_to_world(
+    dynamic_scene_id: impl Into<AssetId<DynamicScene>>,
+    world: &mut World,
+    update_fn: impl Fn(&mut EntityWorldMut<'_>),
+) -> Result<(), String> {
+    world.resource_scope(|world, scenes: Mut<Assets<DynamicScene>>| {
+        let dynamic_scene = scenes
+            .get(dynamic_scene_id)
+            .ok_or("Scene asset not found".to_string())?;
+        write_dynamic_scene_to_world(dynamic_scene, world, update_fn)
+    })
 }
 
 #[cfg(test)]

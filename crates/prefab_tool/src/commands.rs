@@ -1,6 +1,6 @@
-use bevy::{ecs::system::Command, prelude::*, utils::HashMap};
+use bevy::{ecs::system::Command, prelude::*};
 
-use bevy_scene_utils::dynamic_scene_to_scene;
+use bevy_scene_utils::write_dynamic_scene_asset_to_world;
 use save::prelude::*;
 
 use crate::types::PrefabToolResult;
@@ -18,64 +18,39 @@ pub(crate) struct SpawnPrefabCommand {
 
 impl Command for SpawnPrefabCommand {
     fn apply(self, world: &mut World) {
-        let result: Result<DynamicScene, String> =
-            world.resource_scope(|world, scenes: Mut<Assets<DynamicScene>>| {
-                let dynamic_scene = scenes
-                    .get(&self.scene_handle)
-                    .map_or(Err("Could not load scene".to_string()), Ok)?;
+        let result = write_dynamic_scene_asset_to_world(self.scene_handle, world, |entity_mut| {
+            // IMPORTANT: Mark all entities as saveable so they can be saved right away. We send a `RollbackSave` event at
+            // the end of the command, so if the entities aren't marked as saveable they won't be saved.
+            entity_mut.insert(Saveable);
 
-                // Create a `Scene` from the `DynamicScene` so that we can transform it applying to the world
-                let type_registry = world.resource::<AppTypeRegistry>();
-                let mut scene = dynamic_scene_to_scene(dynamic_scene, type_registry)
-                    .map_err(|err| format!("{err:?}"))?;
-
-                // Mark all entities as saveable so that it can be saved right away when we send the RollbackSave event
-                // at the end of this command.
-                let entities: Vec<Entity> = scene.world.iter_entities().map(|e| e.id()).collect();
-                for entity in entities.iter() {
-                    if let Some(mut entity_mut) = scene.world.get_entity_mut(*entity) {
-                        entity_mut.insert(Saveable);
-                    }
+            // apply transform to any entities that do not have a parent
+            let has_parent = entity_mut.contains::<Parent>();
+            if !has_parent {
+                if let Some(mut entity_transform) = entity_mut.get_mut::<Transform>() {
+                    *entity_transform = self.transform.mul_transform(*entity_transform);
                 }
+            }
 
-                // apply transform to scene world
-                let mut query = scene
-                    .world
-                    .query_filtered::<&mut Transform, Without<Parent>>();
-                for mut transform in query.iter_mut(&mut scene.world) {
-                    *transform = self.transform.mul_transform(*transform);
+            // NOTE: if using a physics engine, you might want to clear any `Velocity` components in the scene
+            // if let Some(mut velocity) = entity_mut.get_mut::<Velocity>() {
+            //     velocity.angvel = 0.;
+            //     velocity.linvel = Vec2::ZERO;
+            // }
+
+            // Set parent on any entities that don't have a parent
+            if let Some(parent) = self.parent {
+                if entity_mut.get::<Parent>().is_none() {
+                    entity_mut.set_parent(parent);
                 }
+            }
+        });
 
-                // NOTE: if using `rapier` physics, you might want to clear any `Velocity` components in the scene
-
-                Ok(DynamicScene::from_scene(&scene))
-            });
-
+        // Send events with the result so we can handle the result in the tool plugin
         match result {
-            Ok(dynamic_scene) => {
-                // Write the scene to the world
-                let mut entity_map = HashMap::<Entity, Entity>::new();
-                dynamic_scene
-                    .write_to_world(world, &mut entity_map)
-                    .map_err(|err| format!("{err:?}"))
-                    .expect("failed");
-
-                // handle re-parenting, re-parent all entities that were spawned by getting them from the entity map
-                if let Some(parent) = self.parent {
-                    for entity in entity_map.values() {
-                        if let Some(mut entity_mut) = world.get_entity_mut(*entity) {
-                            if entity_mut.get::<Parent>().is_none() {
-                                entity_mut.set_parent(parent);
-                            }
-                        }
-                    }
-                }
-
-                // send success event
+            Ok(_) => {
                 world.send_event(PrefabToolResult(Ok(self.tool_name.clone())));
             }
             Err(err) => {
-                // send error event
                 world.send_event(PrefabToolResult(Err(format!(
                     "Error spawning {}: {}",
                     self.tool_name, err
