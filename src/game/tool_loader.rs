@@ -20,6 +20,8 @@ impl Plugin for ToolLoaderPlugin {
     }
 }
 
+// TODO: Load the asset collection from a file.
+/// Asset collection which loads all prefab tool assets we have defined here.
 #[derive(AssetCollection, Resource)]
 pub(crate) struct PrefabToolAssets {
     #[asset(
@@ -35,7 +37,7 @@ pub(crate) struct PrefabToolAssets {
     pub tools: Vec<Handle<PrefabToolAsset>>,
 }
 
-/// Add prefab tool assets to the tool library
+/// System that adds prefab tool assets to the tool library once the asset collection has loaded.
 fn handle_tool_assets(
     assets: Res<AssetServer>,
     prefab_tools: Res<PrefabToolAssets>,
@@ -53,28 +55,31 @@ fn handle_tool_assets(
                 .unwrap()
                 .join("prefab.scn.ron");
 
+            // define the prefab tool config
+            let prefab_config = PrefabConfig {
+                name: tool_def.name.clone(),
+                scene: assets.load(scene_path),
+                tool_type: match &tool_def.tool_type {
+                    PrefabToolAssetType::Attachable(config) => {
+                        PrefabToolType::Attachable(PrefabAttachableConfig {
+                            distance: config.distance,
+                            forward: config.forward,
+                        })
+                    }
+                    PrefabToolAssetType::Object => PrefabToolType::Object,
+                },
+                initial_scale: tool_def.initial_scale,
+                scaling: tool_def.scaling.as_ref().map(|scaling| ToolScaling {
+                    min: scaling.min,
+                    max: scaling.max,
+                }),
+            };
+
             // Register the tool in the tool library
             tool_library.register_tool(ToolInfo {
                 key: tool_def.key.clone(),
-                tool: Tool::Prefab(PrefabConfig {
-                    name: tool_def.name.clone(),
-                    scene: assets.load(scene_path),
-                    tool_type: match &tool_def.tool_type {
-                        PrefabToolAssetType::Attachable(config) => {
-                            PrefabToolType::Attachable(PrefabAttachableConfig {
-                                distance: config.distance,
-                                forward: config.forward,
-                            })
-                        }
-                        PrefabToolAssetType::Object => PrefabToolType::Object,
-                    },
-                    initial_scale: tool_def.initial_scale,
-                    scaling: tool_def.scaling.as_ref().map(|scaling| ToolScaling {
-                        min: scaling.min,
-                        max: scaling.max,
-                    }),
-                }),
                 name: tool_def.name.clone(),
+                tool: Tool::Prefab(prefab_config),
             });
         }
     }

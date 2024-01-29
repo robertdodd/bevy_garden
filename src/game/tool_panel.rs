@@ -17,7 +17,7 @@ impl Plugin for ToolPanelPlugin {
                 OnExit(GameState::Game),
                 despawn_recursive_with::<OnToolPanel>,
             )
-            .add_systems(Update, handle_button_interaction_actions);
+            .add_systems(Update, handle_button_interactions);
     }
 }
 
@@ -79,7 +79,7 @@ fn setup_tool_panel(
 
 /// System that handles tool button click actions
 #[allow(clippy::type_complexity)]
-fn handle_button_interaction_actions(
+fn handle_button_interactions(
     mut query: Query<(&ToolButtonAction, &Interaction), Changed<Interaction>>,
     mut tool_stack: ResMut<ToolStack>,
     mut undo_writer: EventWriter<RollbackBackEvent>,

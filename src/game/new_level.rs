@@ -5,6 +5,7 @@ use game_state::prelude::*;
 use save::prelude::*;
 use tree::prelude::TreeBundle;
 
+/// Plugin responsible for setting up a new level during the `PlayState::LoadLevel` state.
 pub struct NewLevelPlugin;
 
 impl Plugin for NewLevelPlugin {
