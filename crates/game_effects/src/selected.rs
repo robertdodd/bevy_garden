@@ -44,6 +44,8 @@ fn setup_wireframe_config(mut wireframe_config: ResMut<WireframeConfig>) {
     wireframe_config.global = false;
 }
 
+/// System that handles `SelectEvents` by adding `Selected` and `Wireframe` components to all entities in the target's
+/// relations.
 fn handle_select_events(
     mut commands: Commands,
     mut events: EventReader<SelectEvent>,
@@ -80,7 +82,7 @@ fn handle_select_events(
     }
 }
 
-/// Add a `Wireframe` marker to selected entities
+/// System that adds `Wireframe` components to selected entities
 #[allow(clippy::type_complexity)]
 fn add_wireframe_to_selected_entities(
     mut commands: Commands,
