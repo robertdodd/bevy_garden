@@ -1,4 +1,5 @@
 use bevy::{ecs::system::Command, prelude::*};
+
 use bevy_scene_utils::*;
 
 use crate::types::CaptureObjectToSceneResult;
@@ -25,17 +26,18 @@ impl Command for CaptureObjectToScene {
         if let Ok(mut scene) = scene {
             // center objects in the scene along the XZ axes.
             // NOTE: The XZ axes are specific to this app, where objects are placed on a fixed plane. If this were a
-            // 2D platformer, we might center them along the XY axes.
+            // 2D platformer we might center them along the XY axes. If objects could be placed anywhere along the Y
+            // axis, we would center them along all 3 axes.
             center_entities_in_scene(&mut scene, Vec3::new(1.0, 0.0, 1.0));
 
             // If using a physics engine, you should clear any `Velocity` components in the scene
             // set_velocity_in_scene(&mut scene, Vec2::ZERO, 0.0);
 
-            // create a dynamic scene from the scene
+            // create a dynamic scene asset from the scene
             let mut assets = world
                 .get_resource_mut::<Assets<DynamicScene>>()
                 .expect("World does not have an Assets<DynamicScene> to add the new scene to");
-            let dynamic_scene_handle = assets.add(scene_to_dynamic_scene(&scene));
+            let dynamic_scene_handle = assets.add(DynamicScene::from_scene(&scene));
 
             world.send_event(CaptureObjectToSceneResult(Ok(dynamic_scene_handle)));
         } else if let Err(err) = scene {

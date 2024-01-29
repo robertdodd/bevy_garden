@@ -1,5 +1,7 @@
 use bevy::{ecs::system::Command, prelude::*};
 
+use crate::utils::ensure_directory_exists_for_filename;
+
 #[cfg(not(target_arch = "wasm32"))]
 use {
     super::utils::*,

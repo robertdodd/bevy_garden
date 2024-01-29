@@ -5,7 +5,8 @@ pub mod plugin;
 pub mod registry;
 pub mod rollbacks;
 pub mod types;
+pub mod utils;
 
 pub mod prelude {
-    pub use crate::{app::AppSaveableExt, events::*, plugin::SavePlugin, registry::*, types::*};
+    pub use crate::{app::*, events::*, plugin::*, registry::*, types::*, utils::*};
 }
