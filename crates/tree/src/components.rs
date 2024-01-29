@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use save::types::Saveable;
 
 /// A tree.
 ///
@@ -27,6 +28,7 @@ pub struct TreeBundle {
     pub tree: Tree,
     pub size: TreeSize,
     pub transform: Transform,
+    pub saveable: Saveable,
 }
 
 impl TreeBundle {
@@ -39,6 +41,7 @@ impl TreeBundle {
                 canopy: Vec3::new(2., 1., 2.),
             },
             transform,
+            saveable: Saveable,
         }
     }
 }

@@ -27,7 +27,7 @@ impl Plugin for FailedToLoadMenuPlugin {
             .add_systems(
                 Update,
                 (
-                    handle_button_interaction_actions.run_if(in_state(MenuState::FailedToLoad)),
+                    handle_button_interactions.run_if(in_state(MenuState::FailedToLoad)),
                     debug_state_changes::<MenuState>,
                 ),
             );
@@ -111,7 +111,7 @@ fn setup_menu(mut commands: Commands, button_style: Res<ToolButtonStyle>) {
 
 /// System that handles click events for buttons on the failed to load menu
 #[allow(clippy::type_complexity)]
-fn handle_button_interaction_actions(
+fn handle_button_interactions(
     mut query: Query<(&FailedToLoadButtonAction, &Interaction), Changed<Interaction>>,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut app_exit_events: EventWriter<AppExit>,
