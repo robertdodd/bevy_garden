@@ -97,11 +97,6 @@ fn update_cursor_position(
 
         // Map the intersection to a `HitData` type by adding local coordinates to the result
         let hit_data = result.and_then(|(hit_entity, hit_data)| {
-            // Get the parent entity
-            let target_entity = family_child_query
-                .get(hit_entity)
-                .map_or(hit_entity, |family_child| family_child.0);
-
             // Get the world coordinates by offsetting along the normal by the `cursor.distance`, making sure to scale
             // the distance.
             let world_normal = hit_data.normal();
@@ -110,7 +105,7 @@ fn update_cursor_position(
 
             // Transform the intersection to local coordinates
             let local_coords = target_query
-                .get(target_entity)
+                .get(hit_entity)
                 .map(|transform| {
                     let inverse_affine = transform.compute_transform().compute_affine().inverse();
                     let local_anchor = inverse_affine.transform_point3(world_pos);
@@ -120,7 +115,7 @@ fn update_cursor_position(
                 .ok();
 
             local_coords.map(|(local_anchor, local_normal)| HitData {
-                entity: target_entity,
+                entity: hit_entity,
                 world_pos,
                 world_normal,
                 local_anchor,
