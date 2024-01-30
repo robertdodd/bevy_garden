@@ -99,9 +99,11 @@ fn update_cursor_position(
         let hit_data = result.and_then(|(hit_entity, hit_data)| {
             // Get the world coordinates by offsetting along the normal by the `cursor.distance`, making sure to scale
             // the distance.
+            // NOTE: Do not normalize the hit normal before transforming it to local space -- for some reason that
+            // causes issues
             let world_normal = hit_data.normal();
-            let world_pos =
-                hit_data.position() + (world_normal * cursor.distance * transform.scale.x);
+            let world_pos = hit_data.position()
+                + (world_normal.normalize() * cursor.distance * transform.scale.x);
 
             // Transform the intersection to local coordinates
             let local_coords = target_query
@@ -109,7 +111,8 @@ fn update_cursor_position(
                 .map(|transform| {
                     let inverse_affine = transform.compute_transform().compute_affine().inverse();
                     let local_anchor = inverse_affine.transform_point3(world_pos);
-                    let local_normal = inverse_affine.transform_vector3(world_normal);
+                    // NOTE: We must use the non-normalized normal here, and normalize it afterwards
+                    let local_normal = inverse_affine.transform_vector3(world_normal).normalize();
                     (local_anchor, local_normal)
                 })
                 .ok();
