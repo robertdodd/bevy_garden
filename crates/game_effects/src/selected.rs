@@ -118,7 +118,9 @@ fn remove_wireframe_from_de_selected_entities(
             // Remove wireframe from child entities
             if let Some(children) = children {
                 for &child in children {
-                    commands.entity(child).remove::<Wireframe>();
+                    if let Some(mut cmds) = commands.get_entity(child) {
+                        cmds.remove::<Wireframe>();
+                    }
                 }
             }
 
